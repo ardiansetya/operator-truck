@@ -17,5 +17,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth.token'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('home');
+    Route::get('/rent', [DashboardController::class, 'rentView'])->name('rent');
+    Route::get('/transit', [DashboardController::class, 'transitView'])->name('transit');
 });

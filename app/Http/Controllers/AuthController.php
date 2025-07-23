@@ -30,7 +30,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'message' => $response->json('message') ?? 'Login gagal!',
+            'message' => $response->json('errors') ?? 'Login gagal!',
         ]);
     }
 

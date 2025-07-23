@@ -5,11 +5,12 @@
 @section('content')
     <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
 
-    @if(session('error'))
-        <div class="mb-4 text-sm text-red-600 bg-red-100 p-2 rounded">
-            {{ session('error') }}
-        </div>
-    @endif
+    @if ($errors->has('message'))
+    <div class="mb-4 text-sm text-red-600 bg-red-100 p-2 rounded">
+        {{ $errors->first('message') }}
+    </div>
+@endif
+
 
     <form action="{{ route('login.submit') }}" method="POST" class="space-y-4">
         @csrf
