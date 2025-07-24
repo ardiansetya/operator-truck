@@ -16,7 +16,7 @@
             <select name="truck_id" id="truck_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                 <option value="">Pilih Truk</option>
                 @foreach ($trucks as $truck)
-                    <option value="{{ $truck['id'] }}" {{ old('truck_id') == $truck['id'] ? 'selected' : '' }}>{{ $truck['license_plate'] }} - {{ $truck['driver_name'] }}</option>
+                    <option value="{{ $truck['id'] }}" {{ old('truck_id') == $truck['id'] ? 'selected' : '' }}>{{ $truck['licensePlate'] }} - {{ $truck['model'] }}</option>
                 @endforeach
             </select>
             @error('truck_id')
@@ -24,9 +24,54 @@
             @enderror
         </div>
         <div class="mb-4">
-            <label for="destination" class="block text-sm font-medium text-gray-600">Tujuan</label>
-            <input type="text" name="destination" id="destination" value="{{ old('destination') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-            @error('destination')
+            <label for="start_city_id" class="block text-sm font-medium text-gray-600">Kota Asal</label>
+            <select name="start_city_id" id="start_city_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                <option value="">Pilih Kota Asal</option>
+                @foreach ($cities as $city)
+                    <option value="{{ $city['id'] }}" {{ old('start_city_id') == $city['id'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
+                @endforeach
+            </select>
+            @error('start_city_id')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="end_city_id" class="block text-sm font-medium text-gray-600">Kota Tujuan</label>
+            <select name="end_city_id" id="end_city_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                <option value="">Pilih Kota Tujuan</option>
+                @foreach ($cities as $city)
+                    <option value="{{ $city['id'] }}" {{ old('end_city_id') == $city['id'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
+                @endforeach
+            </select>
+            @error('end_city_id')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="details" class="block text-sm font-medium text-gray-600">Detail</label>
+            <input type="text" name="details" id="details" value="{{ old('details') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('details')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="base_price" class="block text-sm font-medium text-gray-600">Harga Dasar (Rp)</label>
+            <input type="number" name="base_price" id="base_price" value="{{ old('base_price') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('base_price')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="distance_km" class="block text-sm font-medium text-gray-600">Jarak (km)</label>
+            <input type="number" name="distance_km" id="distance_km" value="{{ old('distance_km') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('distance_km')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="estimated_duration_hours" class="block text-sm font-medium text-gray-600">Estimasi Durasi (jam)</label>
+            <input type="number" name="estimated_duration_hours" id="estimated_duration_hours" value="{{ old('estimated_duration_hours') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('estimated_duration_hours')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>

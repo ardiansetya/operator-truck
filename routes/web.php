@@ -24,7 +24,6 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/rent', [DashboardController::class, 'rentView'])->name('rent');
     Route::get('/transit', [DashboardController::class, 'transitView'])->name('transit');
 
-    // City Routes
     Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
     Route::get('/cities/create', [CityController::class, 'create'])->name('cities.create');
     Route::post('/cities', [CityController::class, 'store'])->name('cities.store');

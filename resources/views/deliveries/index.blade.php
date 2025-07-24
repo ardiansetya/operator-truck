@@ -33,7 +33,12 @@
                 <tr>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">No</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Plat Nomor</th>
-                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Tujuan</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Asal</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Tujuan</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Detail</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Harga (Rp)</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Jarak (km)</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Durasi (jam)</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Status</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Aksi</th>
                 </tr>
@@ -42,16 +47,21 @@
                 @forelse ($deliveries as $index => $delivery)
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $index + 1 }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['truck']['license_plate'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['destination'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['truck']['licensePlate'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['startCityName'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['endCityName'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['details'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ number_format($delivery['basePrice'], 0, ',', '.') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['distanceKM'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['estimatedDurationHours'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $delivery['status'] == 'active' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                {{ $delivery['status'] == 'active' ? 'Aktif' : 'Selesai' }}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $delivery['isActive'] ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                                {{ $delivery['isActive'] ? 'Aktif' : 'Selesai' }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">
                             <a href="{{ route('deliveries.show', $delivery['id']) }}" class="bg-blue-500 text-white px-4 py-1.5 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Detail</a>
-                            @if ($delivery['status'] == 'active')
+                            @if ($delivery['isActive'])
                                 <form method="POST" action="{{ route('deliveries.finish', $delivery['id']) }}" class="inline" onsubmit="return confirm('Yakin ingin menyelesaikan pengiriman ini?')">
                                     @csrf
                                     <button type="submit" class="bg-green-500 text-white px-4 py-1.5 rounded-lg hover:bg-green-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Selesai</button>
@@ -66,7 +76,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-sm text-gray-700 text-center">Tidak ada data pengiriman</td>
+                        <td colspan="10" class="px-6 py-4 text-sm text-gray-700 text-center">Tidak ada data pengiriman</td>
                     </tr>
                 @endforelse
             </tbody>
