@@ -7,47 +7,79 @@ use Illuminate\Support\Facades\Http;
 
 class TruckController extends Controller
 {
-    private $baseUrl = 'http://localhost:8080/api/trucks';
+    private string $baseUrl;
+
+    public function __construct()
+    {
+        $this->baseUrl = config('services.backend_api.url') . '/api/trucks';
+    }
 
     public function index()
     {
-        $response = Http::get($this->baseUrl);
-        return view('trucks.index', ['trucks' => $response['data']]);
+        $token = session('access_token');
+        $response = Http::withToken($token)->get($this->baseUrl);
+        $trucks = $response->json('data');
+        return view('trucks.index', compact('trucks'));
     }
 
-    public function available()
+    public function create()
     {
-        $response = Http::get("$this->baseUrl/available");
-        return response()->json($response['data']);
-    }
-
-    public function show($id)
-    {
-        $response = Http::get("$this->baseUrl/$id");
-        return view('trucks.show', ['truck' => $response['data']]);
+        return view('trucks.create');
     }
 
     public function store(Request $request)
     {
-        $response = Http::post($this->baseUrl, $request->all());
-        return redirect('/trucks')->with('success', $response['data']);
+        $token = session('access_token');
+
+        $validated = $request->validate([
+            'license_plate' => 'required|string',
+            'driver_name' => 'required|string',
+        ]);
+
+        $response = Http::withToken($token)->post($this->baseUrl, $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('trucks.index')->with('success', 'Truk berhasil ditambahkan');
+        }
+
+        return back()->withErrors(['message' => 'Gagal menambahkan truk']);
     }
 
-    public function update(Request $request, $id)
+    public function edit(string $id)
     {
-        $response = Http::put("$this->baseUrl/$id", $request->all());
-        return redirect("/trucks/$id")->with('success', $response['data']);
+        $token = session('access_token');
+        $response = Http::withToken($token)->get("{$this->baseUrl}/{$id}");
+        $truck = $response->json('data');
+        return view('trucks.edit', compact('truck'));
     }
 
-    public function destroy($id)
+    public function update(Request $request, string $id)
     {
-        $response = Http::delete("$this->baseUrl/$id");
-        return redirect('/trucks')->with('success', $response['data']);
+        $token = session('access_token');
+
+        $validated = $request->validate([
+            'license_plate' => 'required|string',
+            'driver_name' => 'required|string',
+        ]);
+
+        $response = Http::withToken($token)->put("{$this->baseUrl}/{$id}", $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('trucks.index')->with('success', 'Truk berhasil diperbarui');
+        }
+
+        return back()->withErrors(['message' => 'Gagal memperbarui truk']);
     }
 
-    public function maintenance($id)
+    public function destroy(string $id)
     {
-        $response = Http::put("$this->baseUrl/maintenance/$id");
-        return redirect('/trucks')->with('success', $response['data']);
+        $token = session('access_token');
+        $response = Http::withToken($token)->delete("{$this->baseUrl}/{$id}");
+
+        if ($response->successful()) {
+            return redirect()->route('trucks.index')->with('success', 'Truk berhasil dihapus');
+        }
+
+        return back()->withErrors(['message' => 'Gagal menghapus truk']);
     }
 }
