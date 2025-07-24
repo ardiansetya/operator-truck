@@ -9,28 +9,28 @@
 </head>
 <body class="bg-gray-50 text-gray-900 font-['Inter'] antialiased">
     <div class="min-h-screen flex flex-col">
-        <!-- Header -->
+        {{-- header --}}
         <header class="bg-white shadow-sm border-b border-gray-100">
-            <div class="container mx-auto px-6 py-4 flex justify-around items-center">
-                <div class="flex items-center space-x-3">
-                    <span class="text-2xl">🚚</span>
-                    <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
-                </div>
-                <div class="flex  items-center space-x-6">
-                    <nav class="flex  space-x-4">
-                        <a href="{{ route('home') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('home') ? 'bg-blue-50 text-blue-600' : '' }}">Home</a>
-                        <a href="{{ route('rent') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('rent') ? 'bg-blue-50 text-blue-600' : '' }}">Rent</a>
-                        <a href="{{ route('transit') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('transit') ? 'bg-blue-50 text-blue-600' : '' }}">Transit</a>
-                    </nav>
-                </div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 ease-in-out transform hover:-translate-y-0.5">
-                        Logout
-                    </button>
-                </form>
+        <div class="container mx-auto px-6 py-4 flex justify-around items-center">
+            <div class="flex items-center space-x-3">
+                <span class="text-2xl">🚚</span>
+                <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
             </div>
-        </header>
+            <div class="flex items-center space-x-6">
+                <nav class="flex space-x-4">
+                    <a href="{{ route('cities.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('cities.*') ? 'bg-blue-50 text-blue-600' : '' }}">Cities</a>
+                    <a href="{{ route('trucks.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('trucks.*') ? 'bg-blue-50 text-blue-600' : '' }}">Trucks</a>
+                    <a href="{{ route('deliveries.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('deliveries.*') ? 'bg-blue-50 text-blue-600' : '' }}">Deliveries</a>
+                </nav>
+            </div>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 ease-in-out transform hover:-translate-y-0.5">
+                    Logout
+                </button>
+            </form>
+        </div>
+    </header>
 
         <!-- Content -->
         <main class="flex-grow container mx-auto px-6 py-8">

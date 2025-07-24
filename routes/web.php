@@ -24,22 +24,27 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/rent', [DashboardController::class, 'rentView'])->name('rent');
     Route::get('/transit', [DashboardController::class, 'transitView'])->name('transit');
 
+    // City Routes
+    Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
+    Route::get('/cities/create', [CityController::class, 'create'])->name('cities.create');
+    Route::post('/cities', [CityController::class, 'store'])->name('cities.store');
+    Route::get('/cities/{id}/edit', [CityController::class, 'edit'])->name('cities.edit');
+    Route::put('/cities/{id}', [CityController::class, 'update'])->name('cities.update');
+    Route::delete('/cities/{id}', [CityController::class, 'destroy'])->name('cities.destroy');
 
-    Route::get('/cities', [CityController::class, 'index']);
-    Route::get('/cities/{id}', [CityController::class, 'show']);
-    Route::post('/cities', [CityController::class, 'store']);
-    Route::put('/cities/{id}', [CityController::class, 'update']);
-    Route::delete('/cities/{id}', [CityController::class, 'destroy']);
+    // Truck Routes
+    Route::get('/trucks', [TruckController::class, 'index'])->name('trucks.index');
+    Route::get('/trucks/create', [TruckController::class, 'create'])->name('trucks.create');
+    Route::post('/trucks', [TruckController::class, 'store'])->name('trucks.store');
+    Route::get('/trucks/{id}/edit', [TruckController::class, 'edit'])->name('trucks.edit');
+    Route::put('/trucks/{id}', [TruckController::class, 'update'])->name('trucks.update');
+    Route::delete('/trucks/{id}', [TruckController::class, 'destroy'])->name('trucks.destroy');
 
-    // Truck
-    Route::get('/trucks', [TruckController::class, 'index']);
-    Route::get('/trucks/available', [TruckController::class, 'available']);
-    Route::get('/trucks/{id}', [TruckController::class, 'show']);
-    Route::post('/trucks', [TruckController::class, 'store']);
-    Route::put('/trucks/{id}', [TruckController::class, 'update']);
-    Route::delete('/trucks/{id}', [TruckController::class, 'destroy']);
-    Route::put('/trucks/maintenance/{id}', [TruckController::class, 'maintenance']);
-
-    // Delivery
-    Route::get('/deliveries/active', [DeliveryController::class, 'active']);
+    // Delivery Routes
+    Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
+    Route::get('/deliveries/create', [DeliveryController::class, 'create'])->name('deliveries.create');
+    Route::post('/deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
+    Route::get('/deliveries/{id}', [DeliveryController::class, 'show'])->name('deliveries.show');
+    Route::post('/deliveries/{id}/finish', [DeliveryController::class, 'finish'])->name('deliveries.finish');
+    Route::delete('/deliveries/{id}', [DeliveryController::class, 'destroy'])->name('deliveries.destroy');
 });
