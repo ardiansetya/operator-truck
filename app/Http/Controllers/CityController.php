@@ -48,7 +48,7 @@ class CityController extends BaseApiController
 
         try {
             $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
-            return $this->handleApiResponse($response, 'Kota berhasil ditambahkan', 'Gagal menambahkan kota');
+            return redirect()->route('cities.index')->with('success', 'Kota berhasil ditambahkan');
         } catch (\Exception $e) {
             Log::error('Error creating city: ' . $e->getMessage());
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
@@ -83,7 +83,7 @@ class CityController extends BaseApiController
 
         try {
             $response = $this->getAuthenticatedHttpClient()->put("{$this->endpoint}/{$id}", $validated);
-            return $this->handleApiResponse($response, 'Kota berhasil diperbarui', 'Gagal memperbarui kota');
+            return redirect()->route('cities.index')->with('success', 'Kota berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error('Error updating city: ' . $e->getMessage());
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
