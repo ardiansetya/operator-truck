@@ -18,15 +18,15 @@ class DashboardController extends BaseApiController
             $trucksResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/trucks');
             $activeTrucksCount = $trucksResponse->successful() ? count(array_filter($trucksResponse->json('data') ?? [], fn($truck) => $truck['is_available'])) : 0;
 
-            // Fetch active deliveries (unconfirmed transits)
-            $deliveriesResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/delivery/active');
-            $activeDeliveriesCount = $deliveriesResponse->successful() ? count($deliveriesResponse->json('data') ?? []) : 0;
+            // // Fetch active deliveries (unconfirmed transits)
+            // $deliveriesResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/delivery/active');
+            // $activeDeliveriesCount = $deliveriesResponse->successful() ? count($deliveriesResponse->json('data') ?? []) : 0;
 
             return view('dashboard.index', [
                 'citiesCount' => $citiesCount,
                 'activeTrucksCount' => $activeTrucksCount,
-                'activeDeliveriesCount' => $activeDeliveriesCount,
-                'unconfirmedTransits' => $activeDeliveriesCount, // Same as active deliveries
+                // 'activeDeliveriesCount' => $activeDeliveriesCount,
+                // 'unconfirmedTransits' => $activeDeliveriesCount, // Same as active deliveries
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching dashboard data: ' . $e->getMessage());
