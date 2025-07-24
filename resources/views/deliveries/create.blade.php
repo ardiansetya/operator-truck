@@ -16,7 +16,7 @@
             <select name="truck_id" id="truck_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                 <option value="">Pilih Truk</option>
                 @foreach ($trucks as $truck)
-                    <option value="{{ $truck['id'] }}" {{ old('truck_id') == $truck['id'] ? 'selected' : '' }}>{{ $truck['licensePlate'] }} - {{ $truck['model'] }}</option>
+                    <option value="{{ (int) $truck['id'] }}" {{ old('truck_id') == $truck['id'] ? 'selected' : '' }}>{{ $truck['license_plate'] }} - {{ $truck['model'] }}</option>
                 @endforeach
             </select>
             @error('truck_id')

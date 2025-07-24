@@ -16,7 +16,7 @@ class DashboardController extends BaseApiController
 
             // Fetch trucks
             $trucksResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/trucks');
-            $activeTrucksCount = $trucksResponse->successful() ? count(array_filter($trucksResponse->json('data') ?? [], fn($truck) => $truck['isAvailable'])) : 0;
+            $activeTrucksCount = $trucksResponse->successful() ? count(array_filter($trucksResponse->json('data') ?? [], fn($truck) => $truck['is_available'])) : 0;
 
             // Fetch active deliveries (unconfirmed transits)
             $deliveriesResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/delivery/active');

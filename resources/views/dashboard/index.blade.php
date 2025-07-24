@@ -19,7 +19,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-medium text-gray-700">Total Kota</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $citiesCount ?? 0 }}</p>
+                <p class="text-3xl font-semibold text-gray-800">{{ $cities_count ?? 0 }}</p>
                 <p class="text-sm text-gray-500">Kota yang terdaftar</p>
             </div>
         </div>
@@ -33,7 +33,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-medium text-gray-700">Truk Aktif</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $activeTrucksCount ?? 0 }}</p>
+                <p class="text-3xl font-semibold text-gray-800">{{ $active_trucks_count ?? 0 }}</p>
                 <p class="text-sm text-gray-500">Truk yang tersedia</p>
             </div>
         </div>
@@ -47,7 +47,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-medium text-gray-700">Pengiriman Aktif</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $activeDeliveriesCount ?? 0 }}</p>
+                <p class="text-3xl font-semibold text-gray-800">{{ $active_deliveries_count ?? 0 }}</p>
                 <p class="text-sm text-gray-500">Pengiriman sedang berlangsung</p>
             </div>
         </div>
@@ -61,7 +61,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-medium text-gray-700">Transit Belum Dikonfirmasi</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $unconfirmedTransits ?? 0 }}</p>
+                <p class="text-3xl font-semibold text-gray-800">{{ $unconfirmed_transits ?? 0 }}</p>
                 <p class="text-sm text-gray-500">Menunggu persetujuan</p>
             </div>
         </div>
