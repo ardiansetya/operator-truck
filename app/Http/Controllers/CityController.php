@@ -39,6 +39,9 @@ class CityController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'country' => 'required|string|max:255',
         ]);
 
         try {
@@ -71,6 +74,9 @@ class CityController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'country' => 'required|string|max:255',
         ]);
 
         try {

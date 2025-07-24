@@ -32,14 +32,15 @@ class DeliveryController extends BaseApiController
 
     public function create()
     {
-        // Ambil data trucks untuk dropdown
         try {
             $trucksResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/trucks');
+            $citiesResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/cities');
             $trucks = $trucksResponse->successful() ? $trucksResponse->json('data') : [];
-
-            return view('deliveries.create', compact('trucks'));
+            $cities = $citiesResponse->successful() ? $citiesResponse->json('data') : [];
+            return view('deliveries.create', compact('trucks', 'cities'));
         } catch (\Exception $e) {
-            return view('deliveries.create', ['trucks' => []]);
+            Log::error('Error fetching data for delivery creation: ' . $e->getMessage());
+            return view('deliveries.create', ['trucks' => [], 'cities' => []]);
         }
     }
 
@@ -47,11 +48,24 @@ class DeliveryController extends BaseApiController
     {
         $validated = $request->validate([
             'truck_id' => 'required|integer',
-            'destination' => 'required|string|max:255',
+            'start_city_id' => 'required|integer',
+            'end_city_id' => 'required|integer',
+            'details' => 'required|string|max:255',
+            'base_price' => 'required|numeric|min:0',
+            'distance_km' => 'required|numeric|min:0',
+            'estimated_duration_hours' => 'required|numeric|min:0',
         ]);
 
         try {
-            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
+            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, [
+                'truckId' => $validated['truck_id'],
+                'startCityName' => $this->getCityName($validated['start_city_id']),
+                'endCityName' => $this->getCityName($validated['end_city_id']),
+                'details' => $validated['details'],
+                'basePrice' => $validated['base_price'],
+                'distanceKM' => $validated['distance_km'],
+                'estimatedDurationHours' => $validated['estimated_duration_hours'],
+            ]);
             return $this->handleApiResponse($response, 'Pengiriman berhasil dibuat', 'Gagal membuat pengiriman');
         } catch (\Exception $e) {
             Log::error('Error creating delivery: ' . $e->getMessage());
@@ -95,6 +109,17 @@ class DeliveryController extends BaseApiController
         } catch (\Exception $e) {
             Log::error('Error deleting delivery: ' . $e->getMessage());
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
+        }
+    }
+
+    private function getCityName($cityId)
+    {
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get("{$this->baseUrl}/api/cities/{$cityId}");
+            return $response->successful() ? $response->json('data')['name'] : '';
+        } catch (\Exception $e) {
+            Log::error('Error fetching city name: ' . $e->getMessage());
+            return '';
         }
     }
 }

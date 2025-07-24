@@ -39,11 +39,20 @@ class TruckController extends BaseApiController
     {
         $validated = $request->validate([
             'license_plate' => 'required|string|max:20',
-            'driver_name' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'cargo_type' => 'required|string|max:255',
+            'capacity_kg' => 'required|numeric|min:0',
+            'is_available' => 'required|boolean',
         ]);
 
         try {
-            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
+            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, [
+                'licensePlate' => $validated['license_plate'],
+                'model' => $validated['model'],
+                'cargoType' => $validated['cargo_type'],
+                'capacityKG' => $validated['capacity_kg'],
+                'isAvailable' => $validated['is_available'],
+            ]);
             return $this->handleApiResponse($response, 'Truk berhasil ditambahkan', 'Gagal menambahkan truk');
         } catch (\Exception $e) {
             Log::error('Error creating truck: ' . $e->getMessage());
@@ -72,11 +81,20 @@ class TruckController extends BaseApiController
     {
         $validated = $request->validate([
             'license_plate' => 'required|string|max:20',
-            'driver_name' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'cargo_type' => 'required|string|max:255',
+            'capacity_kg' => 'required|numeric|min:0',
+            'is_available' => 'required|boolean',
         ]);
 
         try {
-            $response = $this->getAuthenticatedHttpClient()->put("{$this->endpoint}/{$id}", $validated);
+            $response = $this->getAuthenticatedHttpClient()->put("{$this->endpoint}/{$id}", [
+                'licensePlate' => $validated['license_plate'],
+                'model' => $validated['model'],
+                'cargoType' => $validated['cargo_type'],
+                'capacityKG' => $validated['capacity_kg'],
+                'isAvailable' => $validated['is_available'],
+            ]);
             return $this->handleApiResponse($response, 'Truk berhasil diperbarui', 'Gagal memperbarui truk');
         } catch (\Exception $e) {
             Log::error('Error updating truck: ' . $e->getMessage());
