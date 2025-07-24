@@ -3,23 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-class TruckController extends Controller
+class TruckController extends BaseApiController
 {
-    private string $baseUrl;
-
     public function __construct()
     {
-        $this->baseUrl = config('services.java.backend.url') . '/api/trucks';
+        parent::__construct();
+        $this->endpoint = $this->baseUrl . '/api/trucks';
     }
 
     public function index()
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->get($this->baseUrl);
-        $trucks = $response->json('data');
-        return view('trucks.index', compact('trucks'));
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get($this->endpoint);
+
+            if (!$response->successful()) {
+                return view('trucks.index', ['trucks' => [], 'error' => 'Gagal memuat data truk']);
+            }
+
+            $trucks = $response->json('data') ?? [];
+            return view('trucks.index', compact('trucks'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching trucks: ' . $e->getMessage());
+            return view('trucks.index', ['trucks' => [], 'error' => 'Terjadi kesalahan sistem']);
+        }
     }
 
     public function create()
@@ -29,57 +37,61 @@ class TruckController extends Controller
 
     public function store(Request $request)
     {
-        $token = session('access_token');
-
         $validated = $request->validate([
-            'license_plate' => 'required|string',
-            'driver_name' => 'required|string',
+            'license_plate' => 'required|string|max:20',
+            'driver_name' => 'required|string|max:255',
         ]);
 
-        $response = Http::withToken($token)->post($this->baseUrl, $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('trucks.index')->with('success', 'Truk berhasil ditambahkan');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
+            return $this->handleApiResponse($response, 'Truk berhasil ditambahkan', 'Gagal menambahkan truk');
+        } catch (\Exception $e) {
+            Log::error('Error creating truck: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal menambahkan truk']);
     }
 
     public function edit(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->get("{$this->baseUrl}/{$id}");
-        $truck = $response->json('data');
-        return view('trucks.edit', compact('truck'));
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get("{$this->endpoint}/{$id}");
+
+            if (!$response->successful()) {
+                return redirect()->route('trucks.index')->withErrors(['message' => 'Truk tidak ditemukan']);
+            }
+
+            $truck = $response->json('data');
+            return view('trucks.edit', compact('truck'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching truck: ' . $e->getMessage());
+            return redirect()->route('trucks.index')->withErrors(['message' => 'Terjadi kesalahan sistem']);
+        }
     }
 
     public function update(Request $request, string $id)
     {
-        $token = session('access_token');
-
         $validated = $request->validate([
-            'license_plate' => 'required|string',
-            'driver_name' => 'required|string',
+            'license_plate' => 'required|string|max:20',
+            'driver_name' => 'required|string|max:255',
         ]);
 
-        $response = Http::withToken($token)->put("{$this->baseUrl}/{$id}", $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('trucks.index')->with('success', 'Truk berhasil diperbarui');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->put("{$this->endpoint}/{$id}", $validated);
+            return $this->handleApiResponse($response, 'Truk berhasil diperbarui', 'Gagal memperbarui truk');
+        } catch (\Exception $e) {
+            Log::error('Error updating truck: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal memperbarui truk']);
     }
 
     public function destroy(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->delete("{$this->baseUrl}/{$id}");
-
-        if ($response->successful()) {
-            return redirect()->route('trucks.index')->with('success', 'Truk berhasil dihapus');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->delete("{$this->endpoint}/{$id}");
+            return $this->handleApiResponse($response, 'Truk berhasil dihapus', 'Gagal menghapus truk');
+        } catch (\Exception $e) {
+            Log::error('Error deleting truck: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal menghapus truk']);
     }
 }

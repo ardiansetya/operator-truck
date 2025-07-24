@@ -3,77 +3,98 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-class DeliveryController extends Controller
+class DeliveryController extends BaseApiController
 {
-    private string $baseUrl;
-
     public function __construct()
     {
-        $this->baseUrl = config('services.java.backend.url') . '/api/delivery';
+        parent::__construct();
+        $this->endpoint = $this->baseUrl . '/api/delivery';
     }
 
     public function index()
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->get("{$this->baseUrl}/active");
-        $deliveries = $response->json('data');
-        return view('deliveries.index', compact('deliveries'));
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get("{$this->endpoint}/active");
+
+            if (!$response->successful()) {
+                return view('deliveries.index', ['deliveries' => [], 'error' => 'Gagal memuat data pengiriman']);
+            }
+
+            $deliveries = $response->json('data') ?? [];
+            return view('deliveries.index', compact('deliveries'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching deliveries: ' . $e->getMessage());
+            return view('deliveries.index', ['deliveries' => [], 'error' => 'Terjadi kesalahan sistem']);
+        }
     }
 
     public function create()
     {
-        return view('deliveries.create');
+        // Ambil data trucks untuk dropdown
+        try {
+            $trucksResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/trucks');
+            $trucks = $trucksResponse->successful() ? $trucksResponse->json('data') : [];
+
+            return view('deliveries.create', compact('trucks'));
+        } catch (\Exception $e) {
+            return view('deliveries.create', ['trucks' => []]);
+        }
     }
 
     public function store(Request $request)
     {
-        $token = session('access_token');
-
         $validated = $request->validate([
             'truck_id' => 'required|integer',
-            'destination' => 'required|string',
+            'destination' => 'required|string|max:255',
         ]);
 
-        $response = Http::withToken($token)->post($this->baseUrl, $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('deliveries.index')->with('success', 'Pengiriman berhasil dibuat');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
+            return $this->handleApiResponse($response, 'Pengiriman berhasil dibuat', 'Gagal membuat pengiriman');
+        } catch (\Exception $e) {
+            Log::error('Error creating delivery: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal membuat pengiriman']);
     }
 
     public function show(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->get("{$this->baseUrl}/{$id}");
-        $delivery = $response->json('data');
-        return view('deliveries.show', compact('delivery'));
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get("{$this->endpoint}/{$id}");
+
+            if (!$response->successful()) {
+                return redirect()->route('deliveries.index')->withErrors(['message' => 'Pengiriman tidak ditemukan']);
+            }
+
+            $delivery = $response->json('data');
+            return view('deliveries.show', compact('delivery'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching delivery: ' . $e->getMessage());
+            return redirect()->route('deliveries.index')->withErrors(['message' => 'Terjadi kesalahan sistem']);
+        }
     }
 
     public function finish(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->post("{$this->baseUrl}/{$id}/finish");
-
-        if ($response->successful()) {
-            return redirect()->route('deliveries.index')->with('success', 'Pengiriman selesai');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->post("{$this->endpoint}/{$id}/finish");
+            return $this->handleApiResponse($response, 'Pengiriman selesai', 'Gagal menyelesaikan pengiriman');
+        } catch (\Exception $e) {
+            Log::error('Error finishing delivery: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal menyelesaikan pengiriman']);
     }
 
     public function destroy(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->delete("{$this->baseUrl}/{$id}");
-
-        if ($response->successful()) {
-            return redirect()->route('deliveries.index')->with('success', 'Pengiriman berhasil dihapus');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->delete("{$this->endpoint}/{$id}");
+            return $this->handleApiResponse($response, 'Pengiriman berhasil dihapus', 'Gagal menghapus pengiriman');
+        } catch (\Exception $e) {
+            Log::error('Error deleting delivery: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal menghapus pengiriman']);
     }
 }

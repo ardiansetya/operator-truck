@@ -3,23 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-class CityController extends Controller
+class CityController extends BaseApiController
 {
-    private string $baseUrl;
-
     public function __construct()
     {
-        $this->baseUrl = config('services.java.backend.url') . '/api/cities';
+        parent::__construct();
+        $this->endpoint = $this->baseUrl . '/api/cities';
     }
 
     public function index()
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->get($this->baseUrl);
-        $cities = $response->json('data');
-        return view('cities.index', compact('cities'));
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get($this->endpoint);
+
+            if (!$response->successful()) {
+                return view('cities.index', ['cities' => [], 'error' => 'Gagal memuat data kota']);
+            }
+
+            $cities = $response->json('data') ?? [];
+            return view('cities.index', compact('cities'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching cities: ' . $e->getMessage());
+            return view('cities.index', ['cities' => [], 'error' => 'Terjadi kesalahan sistem']);
+        }
     }
 
     public function create()
@@ -29,55 +37,59 @@ class CityController extends Controller
 
     public function store(Request $request)
     {
-        $token = session('access_token');
-
         $validated = $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
         ]);
 
-        $response = Http::withToken($token)->post($this->baseUrl, $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('cities.index')->with('success', 'Kota berhasil ditambahkan');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
+            return $this->handleApiResponse($response, 'Kota berhasil ditambahkan', 'Gagal menambahkan kota');
+        } catch (\Exception $e) {
+            Log::error('Error creating city: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal menambahkan kota']);
     }
 
     public function edit(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->get("{$this->baseUrl}/{$id}");
-        $city = $response->json('data');
-        return view('cities.edit', compact('city'));
+        try {
+            $response = $this->getAuthenticatedHttpClient()->get("{$this->endpoint}/{$id}");
+
+            if (!$response->successful()) {
+                return redirect()->route('cities.index')->withErrors(['message' => 'Kota tidak ditemukan']);
+            }
+
+            $city = $response->json('data');
+            return view('cities.edit', compact('city'));
+        } catch (\Exception $e) {
+            Log::error('Error fetching city: ' . $e->getMessage());
+            return redirect()->route('cities.index')->withErrors(['message' => 'Terjadi kesalahan sistem']);
+        }
     }
 
     public function update(Request $request, string $id)
     {
-        $token = session('access_token');
-
         $validated = $request->validate([
-            'name' => 'required|string',
+            'name' => 'required|string|max:255',
         ]);
 
-        $response = Http::withToken($token)->put("{$this->baseUrl}/{$id}", $validated);
-
-        if ($response->successful()) {
-            return redirect()->route('cities.index')->with('success', 'Kota berhasil diperbarui');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->put("{$this->endpoint}/{$id}", $validated);
+            return $this->handleApiResponse($response, 'Kota berhasil diperbarui', 'Gagal memperbarui kota');
+        } catch (\Exception $e) {
+            Log::error('Error updating city: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal memperbarui kota']);
     }
 
     public function destroy(string $id)
     {
-        $token = session('access_token');
-        $response = Http::withToken($token)->delete("{$this->baseUrl}/{$id}");
-
-        if ($response->successful()) {
-            return redirect()->route('cities.index')->with('success', 'Kota berhasil dihapus');
+        try {
+            $response = $this->getAuthenticatedHttpClient()->delete("{$this->endpoint}/{$id}");
+            return $this->handleApiResponse($response, 'Kota berhasil dihapus', 'Gagal menghapus kota');
+        } catch (\Exception $e) {
+            Log::error('Error deleting city: ' . $e->getMessage());
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }
-
-        return back()->withErrors(['message' => 'Gagal menghapus kota']);
     }
 }
