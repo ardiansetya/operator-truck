@@ -1,7 +1,8 @@
 @extends('layouts.dashboard')
 @section('content')
 <div class="container mx-auto px-6 py-8">
-    <h1 class="text-2xl font-semibold text-gray-800 mb-6">Daftar Truk</h1>
+   <div class="flex justify-between items-center">
+     <h1 class="text-2xl font-semibold text-gray-800 mb-6">Daftar Truk</h1>
 
     @if (session('success'))
         <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
@@ -26,6 +27,7 @@
             Tambah Truk
         </a>
     </div>
+   </div>
 
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-100 rounded-xl shadow-sm">

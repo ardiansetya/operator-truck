@@ -14,7 +14,7 @@
         <div class="container mx-auto px-6 py-4 flex justify-around items-center">
             <div class="flex items-center space-x-3">
                 <span class="text-2xl">🚚</span>
-                <h1 class="text-xl font-semibold text-gray-800">Dashboard</h1>
+                <h1 class="text-xl font-semibold text-gray-800">Tracking Truck</h1>
             </div>
             <div class="flex items-center space-x-6">
                 <nav class="flex space-x-4">
