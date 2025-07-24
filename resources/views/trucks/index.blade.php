@@ -33,7 +33,10 @@
                 <tr>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">No</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Plat Nomor</th>
-                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Nama Driver</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Model</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Tipe Kargo</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kapasitas (kg)</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Ketersediaan</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Aksi</th>
                 </tr>
             </thead>
@@ -41,8 +44,15 @@
                 @forelse ($trucks as $index => $truck)
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $index + 1 }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['license_plate'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['driver_name'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['licensePlate'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['model'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['cargoType'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['capacityKG'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $truck['isAvailable'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $truck['isAvailable'] ? 'Tersedia' : 'Tidak Tersedia' }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">
                             <a href="{{ route('trucks.edit', $truck['id']) }}" class="bg-yellow-500 text-white px-4 py-1.5 rounded-lg hover:bg-yellow-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Edit</a>
                             <form method="POST" action="{{ route('trucks.destroy', $truck['id']) }}" class="inline" onsubmit="return confirm('Yakin ingin menghapus truk ini?')">
@@ -54,7 +64,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-4 text-sm text-gray-700 text-center">Tidak ada data truk</td>
+                        <td colspan="7" class="px-6 py-4 text-sm text-gray-700 text-center">Tidak ada data truk</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -19,9 +19,33 @@
             @enderror
         </div>
         <div class="mb-4">
-            <label for="driver_name" class="block text-sm font-medium text-gray-600">Nama Driver</label>
-            <input type="text" name="driver_name" id="driver_name" value="{{ old('driver_name') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-            @error('driver_name')
+            <label for="model" class="block text-sm font-medium text-gray-600">Model</label>
+            <input type="text" name="model" id="model" value="{{ old('model') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('model')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="cargo_type" class="block text-sm font-medium text-gray-600">Tipe Kargo</label>
+            <input type="text" name="cargo_type" id="cargo_type" value="{{ old('cargo_type') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('cargo_type')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="capacity_kg" class="block text-sm font-medium text-gray-600">Kapasitas (kg)</label>
+            <input type="number" name="capacity_kg" id="capacity_kg" value="{{ old('capacity_kg') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('capacity_kg')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="is_available" class="block text-sm font-medium text-gray-600">Ketersediaan</label>
+            <select name="is_available" id="is_available" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                <option value="1" {{ old('is_available') == '1' ? 'selected' : '' }}>Tersedia</option>
+                <option value="0" {{ old('is_available') == '0' ? 'selected' : '' }}>Tidak Tersedia</option>
+            </select>
+            @error('is_available')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
