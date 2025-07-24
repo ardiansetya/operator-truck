@@ -7,35 +7,77 @@ use Illuminate\Support\Facades\Http;
 
 class CityController extends Controller
 {
-    private $baseUrl = 'http://localhost:8080/api/cities';
+    private string $baseUrl;
+
+    public function __construct()
+    {
+        $this->baseUrl = config('services.backend_api.url') . '/api/cities';
+    }
 
     public function index()
     {
-        $response = Http::get($this->baseUrl);
-        return view('cities.index', ['cities' => $response['data']]);
+        $token = session('access_token');
+        $response = Http::withToken($token)->get($this->baseUrl);
+        $cities = $response->json('data');
+        return view('cities.index', compact('cities'));
     }
 
-    public function show($id)
+    public function create()
     {
-        $response = Http::get("$this->baseUrl/$id");
-        return view('cities.show', ['city' => $response['data']]);
+        return view('cities.create');
     }
 
     public function store(Request $request)
     {
-        $response = Http::post($this->baseUrl, $request->all());
-        return redirect('/cities')->with('success', $response['data']);
+        $token = session('access_token');
+
+        $validated = $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        $response = Http::withToken($token)->post($this->baseUrl, $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('cities.index')->with('success', 'Kota berhasil ditambahkan');
+        }
+
+        return back()->withErrors(['message' => 'Gagal menambahkan kota']);
     }
 
-    public function update(Request $request, $id)
+    public function edit(string $id)
     {
-        $response = Http::put("$this->baseUrl/$id", $request->all());
-        return redirect("/cities/$id")->with('success', $response['data']);
+        $token = session('access_token');
+        $response = Http::withToken($token)->get("{$this->baseUrl}/{$id}");
+        $city = $response->json('data');
+        return view('cities.edit', compact('city'));
     }
 
-    public function destroy($id)
+    public function update(Request $request, string $id)
     {
-        $response = Http::delete("$this->baseUrl/$id");
-        return redirect('/cities')->with('success', $response['data']);
+        $token = session('access_token');
+
+        $validated = $request->validate([
+            'name' => 'required|string',
+        ]);
+
+        $response = Http::withToken($token)->put("{$this->baseUrl}/{$id}", $validated);
+
+        if ($response->successful()) {
+            return redirect()->route('cities.index')->with('success', 'Kota berhasil diperbarui');
+        }
+
+        return back()->withErrors(['message' => 'Gagal memperbarui kota']);
+    }
+
+    public function destroy(string $id)
+    {
+        $token = session('access_token');
+        $response = Http::withToken($token)->delete("{$this->baseUrl}/{$id}");
+
+        if ($response->successful()) {
+            return redirect()->route('cities.index')->with('success', 'Kota berhasil dihapus');
+        }
+
+        return back()->withErrors(['message' => 'Gagal menghapus kota']);
     }
 }
