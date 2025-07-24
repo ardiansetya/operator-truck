@@ -33,6 +33,9 @@
                 <tr>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">No</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Nama Kota</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Latitude</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Longitude</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Negara</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Aksi</th>
                 </tr>
             </thead>
@@ -41,6 +44,9 @@
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $index + 1 }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $city['name'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $city['latitude'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $city['longitude'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $city['country'] }}</td>
                         <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">
                             <a href="{{ route('cities.edit', $city['id']) }}" class="bg-yellow-500 text-white px-4 py-1.5 rounded-lg hover:bg-yellow-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Edit</a>
                             <form method="POST" action="{{ route('cities.destroy', $city['id']) }}" class="inline" onsubmit="return confirm('Yakin ingin menghapus kota ini?')">
@@ -52,7 +58,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="px-6 py-4 text-sm text-gray-700 text-center">Tidak ada data kota</td>
+                        <td colspan="6" class="px-6 py-4 text-sm text-gray-700 text-center">Tidak ada data kota</td>
                     </tr>
                 @endforelse
             </tbody>

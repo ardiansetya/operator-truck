@@ -19,6 +19,27 @@
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
+        <div class="mb-4">
+            <label for="latitude" class="block text-sm font-medium text-gray-600">Latitude</label>
+            <input type="number" step="any" name="latitude" id="latitude" value="{{ old('latitude', $city['latitude']) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('latitude')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="longitude" class="block text-sm font-medium text-gray-600">Longitude</label>
+            <input type="number" step="any" name="longitude" id="longitude" value="{{ old('longitude', $city['longitude']) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('longitude')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-4">
+            <label for="country" class="block text-sm font-medium text-gray-600">Negara</label>
+            <input type="text" name="country" id="country" value="{{ old('country', $city['country']) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('country')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
         <div class="flex space-x-3">
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Simpan</button>
             <a href="{{ route('cities.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Batal</a>
