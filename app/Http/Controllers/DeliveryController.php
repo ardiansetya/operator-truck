@@ -11,7 +11,7 @@ class DeliveryController extends Controller
 
     public function __construct()
     {
-        $this->baseUrl = config('services.backend_api.url') . '/api/delivery';
+        $this->baseUrl = config('services.java.backend.url') . '/api/delivery';
     }
 
     public function index()

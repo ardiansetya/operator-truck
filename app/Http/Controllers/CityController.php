@@ -11,7 +11,7 @@ class CityController extends Controller
 
     public function __construct()
     {
-        $this->baseUrl = config('services.backend_api.url') . '/api/cities';
+        $this->baseUrl = config('services.java.backend.url') . '/api/cities';
     }
 
     public function index()
