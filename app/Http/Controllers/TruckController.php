@@ -120,11 +120,16 @@ class TruckController extends BaseApiController
             $validated = $request->validate([
                 'license_plate' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
-                'capacity' => 'required|numeric|min:0',
+                'capacity_kg' => 'required|numeric|min:0',
+                'cargo_type' => 'required|string|max:255',
+                'is_available' => 'boolean',
             ]);
 
+            $validated['is_available'] = $validated['is_available'] == '1';
+
+
             $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", $validated);
-            return $this->handleApiResponse($response, 'Truk berhasil diperbarui', 'Gagal memperbarui truk');
+            return redirect()->route('trucks.index')->with('success', 'Truk berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error('Error updating truck: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
