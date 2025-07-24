@@ -23,6 +23,8 @@ class CityController extends BaseApiController
             }
 
             $cities = $response->json('data') ?? [];
+
+            log::info('Cities fetched successfully', ['count' => count($cities)]);
             return view('cities.index', compact('cities'));
         } catch (\Exception $e) {
             Log::error('Error fetching cities: ' . $e->getMessage());

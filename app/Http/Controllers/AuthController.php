@@ -26,7 +26,7 @@ class AuthController extends Controller
                 'token_type' => $data['token_type'],
             ]);
 
-            return redirect()->route('dashboard');
+            return redirect()->route('dashboard.index');
         }
 
         return back()->withErrors([
@@ -39,7 +39,7 @@ class AuthController extends Controller
     {
         $response = Http::post("{$this->javaBackend}/auth/register", $request->all());
 
-        return response()->json($response->json(), $response->status());
+        return redirect()->route('login');
     }
 
     public function validateToken(Request $request)

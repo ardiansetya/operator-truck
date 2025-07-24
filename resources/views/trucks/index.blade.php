@@ -44,13 +44,13 @@
                 @forelse ($trucks as $index => $truck)
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $index + 1 }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['licensePlate'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['license_plate'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['model'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['cargoType'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['capacityKG'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['cargo_type'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['capacity_kg'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $truck['isAvailable'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $truck['isAvailable'] ? 'Tersedia' : 'Tidak Tersedia' }}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $truck['is_available'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $truck['is_available'] ? 'Tersedia' : 'Tidak Tersedia' }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">

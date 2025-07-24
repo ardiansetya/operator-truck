@@ -13,7 +13,7 @@ abstract class BaseApiController extends Controller
 
     public function __construct()
     {
-        $this->baseUrl = config('services.java.backend.url');
+        $this->baseUrl = env('JAVA_BACKEND_URL', 'http://localhost:8080');
     }
 
     protected function getAuthenticatedHttpClient()

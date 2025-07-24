@@ -16,7 +16,7 @@ class DeliveryController extends BaseApiController
     public function index()
     {
         try {
-            $response = $this->getAuthenticatedHttpClient()->get("{$this->endpoint}/active");
+            $response = $this->getAuthenticatedHttpClient()->get("{$this->endpoint}");
 
             if (!$response->successful()) {
                 return view('deliveries.index', ['deliveries' => [], 'error' => 'Gagal memuat data pengiriman']);

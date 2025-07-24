@@ -7,6 +7,10 @@ use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\TruckController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', function () {
+    return redirect()->route('dashboard.index');
+});
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
     Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
@@ -20,10 +24,10 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth.token'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('dashboard');
-    Route::get('/rent', [DashboardController::class, 'rentView'])->name('rent');
-    Route::get('/transit', [DashboardController::class, 'transitView'])->name('transit');
+    // Dashboard Route
+    Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('dashboard.index');
 
+    // City Routes
     Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
     Route::get('/cities/create', [CityController::class, 'create'])->name('cities.create');
     Route::post('/cities', [CityController::class, 'store'])->name('cities.store');

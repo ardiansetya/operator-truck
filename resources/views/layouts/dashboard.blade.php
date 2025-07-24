@@ -18,6 +18,7 @@
             </div>
             <div class="flex items-center space-x-6">
                 <nav class="flex space-x-4">
+                    <a href="{{ route('dashboard.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('dashboard.*') ? 'bg-blue-50 text-blue-600' : '' }}">Dashboard</a>
                     <a href="{{ route('cities.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('cities.*') ? 'bg-blue-50 text-blue-600' : '' }}">Cities</a>
                     <a href="{{ route('trucks.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('trucks.*') ? 'bg-blue-50 text-blue-600' : '' }}">Trucks</a>
                     <a href="{{ route('deliveries.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('deliveries.*') ? 'bg-blue-50 text-blue-600' : '' }}">Deliveries</a>
