@@ -26,7 +26,7 @@
                     <select name="start_city_id" id="start_city_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <option value="">Pilih Kota</option>
                         @foreach ($cities as $city)
-                            <option value="{{ $city['id'] }}" {{ $city['id'] == $route['startCityId'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
+                            <option value="{{ (int) $city['id'] }}" {{ $city['name'] == $route['start_city_name'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
                         @endforeach
                     </select>
                     @error('start_city_id')
@@ -38,7 +38,7 @@
                     <select name="end_city_id" id="end_city_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <option value="">Pilih Kota</option>
                         @foreach ($cities as $city)
-                            <option value="{{ $city['id'] }}" {{ $city['id'] == $route['endCityId'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
+                            <option value="{{ (int) $city['id'] }}" {{ $city['name'] == $route['end_city_name'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
                         @endforeach
                     </select>
                     @error('end_city_id')
@@ -54,7 +54,7 @@
                 </div>
                 <div>
                     <label for="base_price" class="block text-sm font-medium text-gray-700">Harga Dasar</label>
-                    <input type="number" name="base_price" id="base_price" value="{{ $route['basePrice'] ?? old('base_price') }}" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    <input type="number" name="base_price" id="base_price" value="{{ (float) $route['base_price'] ?? old('base_price') }}" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     @error('base_price')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -62,8 +62,8 @@
                 <div>
                     <label for="is_active" class="block text-sm font-medium text-gray-700">Status</label>
                     <select name="is_active" id="is_active" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <option value="1" {{ $route['isActive'] ? 'selected' : '' }}>Aktif</option>
-                        <option value="0" {{ ! $route['isActive'] ? 'selected' : '' }}>Non-Aktif</option>
+                        <option value="1" {{ $route['is_active'] ? 'selected' : '' }}>Aktif</option>
+                        <option value="0" {{ ! $route['is_active'] ? 'selected' : '' }}>Non-Aktif</option>
                     </select>
                     @error('is_active')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

@@ -99,12 +99,12 @@ class RouteController extends BaseApiController
                 'start_city_id' => (int) $validated['start_city_id'],
                 'end_city_id' => (int) $validated['end_city_id'],
                 'details' => $validated['details'],
-                'base_price' => $validated['base_price'],
+                'base_price' => (float) $validated['base_price'],
                 'is_active' => (bool) $validated['is_active'],
             ]);
 
             $validated['is_active'] = $validated['is_active'] == '1';
-
+            
 
 
             return redirect()->route('routes.index')->with('success', 'Rute berhasil dibuat');
@@ -176,6 +176,8 @@ class RouteController extends BaseApiController
                 Log::error('API request failed for cities', ['status' => $citiesResponse->status(), 'body' => $citiesResponse->body()]);
                 return view('routes.edit', ['route' => $route, 'cities' => [], 'error' => 'Gagal memuat data kota']);
             }
+
+            
             $cities = $citiesResponse->json('data') ?? [];
 
             return view('routes.edit', compact('route', 'cities'));
@@ -187,6 +189,8 @@ class RouteController extends BaseApiController
 
     public function update(Request $request, string $id)
     {
+       
+
         try {
             if (empty($this->baseUrl)) {
                 return back()->withErrors(['message' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.']);
@@ -201,14 +205,25 @@ class RouteController extends BaseApiController
             ]);
 
             $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", [
-                'startCityId' => $validated['start_city_id'],
-                'endCityId' => $validated['end_city_id'],
+                'start_city_id' => (int) $validated['start_city_id'],
+                'end_city_id' => (int) $validated['end_city_id'],
                 'details' => $validated['details'],
-                'basePrice' => $validated['base_price'],
-                'isActive' => $validated['is_active'],
+                'base_price' => (float) $validated['base_price'],
+                'is_active' => (bool) $validated['is_active'],
             ]);
 
-            return $this->handleApiResponse($response, 'Rute berhasil diperbarui', 'Gagal memperbarui rute');
+            $validated['is_active'] = $validated['is_active'] == '1';       
+
+            Log::info('Sending payload to PUT /api/routes/{id}', ['id' => $id, 'payload' => [
+                'start_city_id' => (int) $validated['start_city_id'],
+                'end_city_id' => (int) $validated['end_city_id'],
+                'details' => $validated['details'],
+                'base_price' => (float) $validated['base_price'],
+                'is_active' => (bool) $validated['is_active'],
+            ]]);
+
+
+            return redirect()->route('routes.index')->with('success', 'Rute berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error('Error updating route: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
