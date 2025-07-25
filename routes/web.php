@@ -25,7 +25,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 });
 
-Route::middleware(['auth.token'])->group(function () {
+Route::middleware(['auth.token'])->middleware('auto.token.refresh')->group(function () {
     // Dashboard Route
     Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('dashboard.index');
 
