@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\RouteController;
 use App\Http\Controllers\TransitPointController;
 use App\Http\Controllers\TruckController;
 use Illuminate\Support\Facades\Route;
@@ -60,4 +61,14 @@ Route::middleware(['auth.token'])->group(function () {
     Route::get('/transit-points/{id}/edit', [TransitPointController::class, 'edit'])->name('transit-points.edit');
     Route::put('/transit-points/{id}', [TransitPointController::class, 'update'])->name('transit-points.update');
     Route::delete('/transit-points/{id}', [TransitPointController::class, 'destroy'])->name('transit-points.destroy');
+
+    // Route Management
+   
+    Route::get('/routes', [RouteController::class, 'index'])->name('routes.index');
+    Route::get('/routes/create', [RouteController::class, 'create'])->name('routes.create');
+    Route::post('/routes', [RouteController::class, 'store'])->name('routes.store');
+    Route::get('/routes/{id}', [RouteController::class, 'show'])->name('routes.show');
+    Route::get('/routes/{id}/edit', [RouteController::class, 'edit'])->name('routes.edit');
+    Route::put('/routes/{id}', [RouteController::class, 'update'])->name('routes.update');
+    Route::delete('/routes/{id}', [RouteController::class, 'destroy'])->name('routes.destroy');
 });

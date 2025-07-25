@@ -21,6 +21,7 @@
                     <a href="{{ route('dashboard.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('dashboard.*') ? 'bg-blue-50 text-blue-600' : '' }}">Dashboard</a>
                     <a href="{{ route('cities.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('cities.*') ? 'bg-blue-50 text-blue-600' : '' }}">Cities</a>
                     <a href="{{ route('trucks.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('trucks.*') ? 'bg-blue-50 text-blue-600' : '' }}">Trucks</a>
+                    <a href="{{ route('routes.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('routes.*') ? 'bg-blue-50 text-blue-600' : '' }}">Routes</a>
                     <a href="{{ route('deliveries.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('deliveries.*') ? 'bg-blue-50 text-blue-600' : '' }}">Deliveries</a>
                      <a href="{{ route('transit-points.index') }}" class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('transit-points.*') ? 'bg-blue-50 text-blue-600' : '' }}">Transit Points</a>
                 </nav>

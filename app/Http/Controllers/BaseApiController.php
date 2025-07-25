@@ -12,7 +12,7 @@ abstract class BaseApiController extends Controller
 
     public function __construct()
     {
-        $baseUrl = env('JAVA_BACKEND_URL', '');
+        $baseUrl = env('JAVA_BACKEND_URL', 'http://localhost:8080');
 
         if (empty($baseUrl)) {
             Log::error('BaseApiController: JAVA_BACKEND_URL is not configured in .env');
