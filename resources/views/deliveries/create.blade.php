@@ -9,6 +9,12 @@
         </div>
     @endif
 
+    @if (isset($error))
+        <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
+            {{ $error }}
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('deliveries.store') }}" class="max-w-lg bg-white p-6 rounded-xl shadow-sm">
         @csrf
         <div class="mb-4">
@@ -16,7 +22,7 @@
             <select name="truck_id" id="truck_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                 <option value="">Pilih Truk</option>
                 @foreach ($trucks as $truck)
-                    <option value="{{ (int) $truck['id'] }}" {{ old('truck_id') == $truck['id'] ? 'selected' : '' }}>{{ $truck['license_plate'] }} - {{ $truck['model'] }}</option>
+                    <option value="{{ $truck['id'] }}" {{ old('truck_id') == $truck['id'] ? 'selected' : '' }}>{{ $truck['license_plate'] }} - {{ $truck['model'] }}</option>
                 @endforeach
             </select>
             @error('truck_id')
@@ -24,54 +30,40 @@
             @enderror
         </div>
         <div class="mb-4">
-            <label for="start_city_id" class="block text-sm font-medium text-gray-600">Kota Asal</label>
-            <select name="start_city_id" id="start_city_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                <option value="">Pilih Kota Asal</option>
-                @foreach ($cities as $city)
-                    <option value="{{ $city['id'] }}" {{ old('start_city_id') == $city['id'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
+            <label for="route_id" class="block text-sm font-medium text-gray-600">Rute</label>
+            <select name="route_id" id="route_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                <option value="">Pilih Rute</option>
+                @foreach ($routes as $route)
+                    <option value="{{ $route['id'] }}" {{ old('route_id') == $route['id'] ? 'selected' : '' }}>{{ $route['start_city_name'] }} - {{ $route['end_city_name'] }}</option>
                 @endforeach
             </select>
-            @error('start_city_id')
+            @error('route_id')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
         <div class="mb-4">
-            <label for="end_city_id" class="block text-sm font-medium text-gray-600">Kota Tujuan</label>
-            <select name="end_city_id" id="end_city_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                <option value="">Pilih Kota Tujuan</option>
-                @foreach ($cities as $city)
-                    <option value="{{ $city['id'] }}" {{ old('end_city_id') == $city['id'] ? 'selected' : '' }}>{{ $city['name'] }}</option>
+            <label for="worker_id" class="block text-sm font-medium text-gray-600">Pengemudi</label>
+            <select name="worker_id" id="worker_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                <option value="">Pilih Pengemudi</option>
+                @foreach ($drivers as $driver)
+                    <option value="{{ $driver['id'] }}" {{ old('worker_id') == $driver['id'] ? 'selected' : '' }}>{{ $driver['name'] }}</option>
                 @endforeach
             </select>
-            @error('end_city_id')
+            @error('worker_id')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
         <div class="mb-4">
-            <label for="details" class="block text-sm font-medium text-gray-600">Detail</label>
-            <input type="text" name="details" id="details" value="{{ old('details') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-            @error('details')
+            <label for="latitude" class="block text-sm font-medium text-gray-600">Latitude</label>
+            <input type="number" step="any" name="latitude" id="latitude" value="{{ old('latitude', -6.200000) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('latitude')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>
         <div class="mb-4">
-            <label for="base_price" class="block text-sm font-medium text-gray-600">Harga Dasar (Rp)</label>
-            <input type="number" name="base_price" id="base_price" value="{{ old('base_price') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-            @error('base_price')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
-        <div class="mb-4">
-            <label for="distance_km" class="block text-sm font-medium text-gray-600">Jarak (km)</label>
-            <input type="number" name="distance_km" id="distance_km" value="{{ old('distance_km') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-            @error('distance_km')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
-        </div>
-        <div class="mb-4">
-            <label for="estimated_duration_hours" class="block text-sm font-medium text-gray-600">Estimasi Durasi (jam)</label>
-            <input type="number" name="estimated_duration_hours" id="estimated_duration_hours" value="{{ old('estimated_duration_hours') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-            @error('estimated_duration_hours')
+            <label for="longitude" class="block text-sm font-medium text-gray-600">Longitude</label>
+            <input type="number" step="any" name="longitude" id="longitude" value="{{ old('longitude', 106.816666) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+            @error('longitude')
                 <span class="text-red-500 text-sm">{{ $message }}</span>
             @enderror
         </div>

@@ -12,11 +12,15 @@
     <div class="max-w-lg bg-white p-6 rounded-xl shadow-sm">
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Plat Nomor</label>
-            <p class="mt-1 text-gray-700">{{ $delivery['truck']['licensePlate'] }}</p>
+            <p class="mt-1 text-gray-700">{{ $delivery['truckLicensePlate'] }}</p>
         </div>
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Model Truk</label>
-            <p class="mt-1 text-gray-700">{{ $delivery['truck']['model'] }}</p>
+            <p class="mt-1 text-gray-700">{{ $delivery['truck']['model'] ?? 'Unknown' }}</p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600">Pekerja</label>
+            <p class="mt-1 text-gray-700">{{ $delivery['worker']['name'] ?? 'Unknown' }}</p>
         </div>
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Kota Asal</label>
@@ -27,20 +31,20 @@
             <p class="mt-1 text-gray-700">{{ $delivery['endCityName'] }}</p>
         </div>
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-600">Detail</label>
-            <p class="mt-1 text-gray-700">{{ $delivery['details'] }}</p>
-        </div>
-        <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Harga Dasar (Rp)</label>
             <p class="mt-1 text-gray-700">{{ number_format($delivery['basePrice'], 0, ',', '.') }}</p>
         </div>
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Jarak (km)</label>
-            <p class="mt-1 text-gray-700">{{ $delivery['distanceKM'] }}</p>
+            <p class="mt-1 text-gray-700">{{ $delivery['distanceKm'] }}</p>
         </div>
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Estimasi Durasi (jam)</label>
             <p class="mt-1 text-gray-700">{{ $delivery['estimatedDurationHours'] }}</p>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-600">Koordinat</label>
+            <p class="mt-1 text-gray-700">Lat: {{ $delivery['latitude'] }}, Long: {{ $delivery['longitude'] }}</p>
         </div>
         <div class="mb-4">
             <label class="block text-sm font-medium text-gray-600">Status</label>
@@ -55,6 +59,7 @@
             @if ($delivery['isActive'])
                 <form method="POST" action="{{ route('deliveries.finish', $delivery['id']) }}" class="inline" onsubmit="return confirm('Yakin ingin menyelesaikan pengiriman ini?')">
                     @csrf
+                    @method('PATCH')
                     <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Selesai</button>
                 </form>
             @endif

@@ -1,8 +1,12 @@
 @extends('layouts.dashboard')
 @section('content')
 <div class="container mx-auto px-6 py-8">
-    <div class="flex justify-between items-center "> 
+    <div class="flex justify-between items-center">
         <h1 class="text-2xl font-semibold text-gray-800 mb-6">Daftar Pengiriman</h1>
+        <a href="{{ route('deliveries.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">
+            Tambah Pengiriman
+        </a>
+    </div>
 
     @if (session('success'))
         <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
@@ -22,13 +26,6 @@
         </div>
     @endif
 
-    <div class="mb-6">
-        <a href="{{ route('deliveries.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">
-            Tambah Pengiriman
-        </a>
-    </div>
-    </div>
-
     <div class="overflow-x-auto">
         <table class="min-w-full bg-white border border-gray-100 rounded-xl shadow-sm">
             <thead class="bg-gray-50">
@@ -37,7 +34,7 @@
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Plat Nomor</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Asal</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Tujuan</th>
-                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Detail</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Pekerja</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Harga (Rp)</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Jarak (km)</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Durasi (jam)</th>
@@ -49,15 +46,15 @@
                 @forelse ($deliveries as $index => $delivery)
                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $index + 1 }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['truck']['license_plate'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['start_city_name'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['end_city_name'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['details'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ number_format($delivery['base_price'], 0, ',', '.') }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['distance_km'] }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['estimated_duration_hours'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['truckLicensePlate'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['startCityName'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['endCityName'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['worker']['name'] ?? 'Unknown' }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ number_format($delivery['basePrice'], 0, ',', '.') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['distanceKm'] }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['estimatedDurationHours'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $delivery['is_active'] ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $delivery['isActive'] ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
                                 {{ $delivery['isActive'] ? 'Aktif' : 'Selesai' }}
                             </span>
                         </td>
@@ -66,6 +63,7 @@
                             @if ($delivery['isActive'])
                                 <form method="POST" action="{{ route('deliveries.finish', $delivery['id']) }}" class="inline" onsubmit="return confirm('Yakin ingin menyelesaikan pengiriman ini?')">
                                     @csrf
+                                    @method('PATCH')
                                     <button type="submit" class="bg-green-500 text-white px-4 py-1.5 rounded-lg hover:bg-green-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Selesai</button>
                                 </form>
                             @endif
