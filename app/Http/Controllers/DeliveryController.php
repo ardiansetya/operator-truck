@@ -95,7 +95,7 @@ class DeliveryController extends BaseApiController
             $routes = $routesResponse->successful() ? $routesResponse->json('data') ?? [] : [];
 
             // Fetch drivers
-            $driversResponse = $this->makeRequest('get', $this->baseUrl . '/api/drivers');
+            $driversResponse = $this->makeRequest('get', $this->baseUrl . '/api/users/drivers');
             if ($driversResponse instanceof \Illuminate\Http\RedirectResponse) {
                 return $driversResponse;
             }

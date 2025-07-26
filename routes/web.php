@@ -26,7 +26,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 });
 
-Route::middleware([ 'auth.token.refresh', 'role:ADMIN,DRIVER'])->group(function () {
+Route::middleware([ 'auth.token.refresh', 'role:ADMIN'])->group(function () {
     // Dashboard Route
     Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('dashboard.index');
 

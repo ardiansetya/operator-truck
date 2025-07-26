@@ -46,7 +46,7 @@
             <select name="worker_id" id="worker_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                 <option value="">Pilih Pengemudi</option>
                 @foreach ($drivers as $driver)
-                    <option value="{{ $driver['id'] }}" {{ old('worker_id') == $driver['id'] ? 'selected' : '' }}>{{ $driver['name'] }}</option>
+                    <option value="{{ $driver['id'] }}" {{ old('worker_id') == $driver['id'] ? 'selected' : '' }}>{{ $driver['username'] }}</option>
                 @endforeach
             </select>
             @error('worker_id')
