@@ -12,8 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'auth.token' => \App\Http\Middleware\EnsureTokenIsValid::class,
-            'auto.token.refresh' => \App\Http\Middleware\AutoTokenRefresh::class,
+            'auth.token.refresh' => \App\Http\Middleware\AuthTokenWithRefresh::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
 
         ]);

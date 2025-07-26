@@ -34,7 +34,7 @@
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-600">Nomor Telepon</label>
-                <p class="mt-1 text-gray-700">{{ $profile['phoneNumber'] ?? 'Unknown' }}</p>
+                <p class="mt-1 text-gray-700">{{ $profile['phone_number'] ?? 'Unknown' }}</p>
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-600">Umur</label>
@@ -51,6 +51,13 @@
             <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
                 @csrf
                 <div>
+                    <label for="username" class="block text-sm font-medium text-gray-600">Username</label>
+                    <input type="text" name="username" id="username" value="{{ old('username', $profile['username'] ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    @error('username')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div>
                     <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
                     <input type="email" name="email" id="email" value="{{ old('email', $profile['email'] ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                     @error('email')
@@ -59,7 +66,7 @@
                 </div>
                 <div>
                     <label for="phone_number" class="block text-sm font-medium text-gray-600">Nomor Telepon</label>
-                    <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $profile['phoneNumber'] ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $profile['phone_number'] ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                     @error('phone_number')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
@@ -79,30 +86,30 @@
         </div>
 
         <div class="max-w-lg bg-white p-6 rounded-xl shadow-sm">
-            <h2 class="text-xl font-medium text-gray-700 mb-4">Perbarui Kata Sandi</h2>
+            <h2 class="text-xl font-medium text-gray-700 mb-4">Reset Kata Sandi</h2>
             <form method="POST" action="{{ route('profile.update-password') }}" class="space-y-4">
                 @csrf
                 <div>
                     <label for="current_password" class="block text-sm font-medium text-gray-600">Kata Sandi Saat Ini</label>
-                    <input type="password" name="current_password" id="current_password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <input type="text" name="password" id="current_password" type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                     @error('current_password')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
                 <div>
                     <label for="new_password" class="block text-sm font-medium text-gray-600">Kata Sandi Baru</label>
-                    <input type="password" name="new_password" id="new_password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <input type="password" name="password" id="new_password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
                     @error('new_password')
                         <span class="text-red-500 text-sm">{{ $message }}</span>
                     @enderror
                 </div>
                 <div>
                     <label for="new_password_confirmation" class="block text-sm font-medium text-gray-600">Konfirmasi Kata Sandi Baru</label>
-                    <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                    <input type="password" name="password_confirmation" id="new_password_confirmation" class="mt-1 block w-full rounded-md border-gray-50" required>
                 </div>
                 <div class="flex space-x-3">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Simpan</button>
-                    <a href="{{ route('dashboard.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Kembali</a>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Reset</button>
+                    <a href="{{ route('dashboard.index') }}" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Kembali</a>
                 </div>
             </form>
         </div>
