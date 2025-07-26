@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RouteController;
 use App\Http\Controllers\TransitPointController;
 use App\Http\Controllers\TruckController;
@@ -25,9 +26,14 @@ Route::prefix('auth')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 });
 
-Route::middleware(['auth.token'])->middleware('auto.token.refresh')->group(function () {
+Route::middleware(['auth.token', 'role:ADMIN,DRIVER', 'auto.token.refresh'])->group(function () {
     // Dashboard Route
     Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('dashboard.index');
+
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
     // City Routes
     Route::get('/cities', [CityController::class, 'index'])->name('cities.index');
@@ -71,4 +77,24 @@ Route::middleware(['auth.token'])->middleware('auto.token.refresh')->group(funct
     Route::get('/routes/{id}/edit', [RouteController::class, 'edit'])->name('routes.edit');
     Route::put('/routes/{id}', [RouteController::class, 'update'])->name('routes.update');
     Route::delete('/routes/{id}', [RouteController::class, 'destroy'])->name('routes.destroy');
+});
+
+Route::get('/debug-token', function () {
+    $token = session('access_token');
+    if (!$token) {
+        return response()->json(['error' => 'No token found in session']);
+    }
+    $baseUrl = env('JAVA_BACKEND_URL', 'http://localhost:8080');
+    if (empty($baseUrl)) {
+        return response()->json(['error' => 'JAVA_BACKEND_URL is not configured'], 500);
+    }
+    $response = \Illuminate\Support\Facades\Http::withToken($token)
+        ->withHeaders(['Accept' => 'application/json'])
+        ->get($baseUrl . '/api/users/profile');
+    return response()->json([
+        'token' => substr($token, 0, 10) . '...',
+        'profile_response' => $response->json(),
+        'status' => $response->status(),
+        'url' => $baseUrl . '/api/users/profile', 
+    ]);
 });

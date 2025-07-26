@@ -35,10 +35,8 @@ return [
         ],
     ],
 
-    'java' => [
-        'backend' => [
-            'url' => env('JAVA_BACKEND_URL'),
-        ],
+    'java_backend' => [
+        'url' => env('JAVA_BACKEND_URL', 'http://localhost:8080'), 
     ],
 
 ];
