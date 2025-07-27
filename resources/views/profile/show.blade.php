@@ -41,7 +41,7 @@
                 <p class="mt-1 text-gray-700">{{ $profile['age'] ?? 'Unknown' }}</p>
             </div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-600">Peran</label>
+                <label class="block text-sm font-medium text-gray-600">Role</label>
                 <p class="mt-1 text-gray-700">{{ $profile['role'] ?? 'Unknown' }}</p>
             </div>
         </div>

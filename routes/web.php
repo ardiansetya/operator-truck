@@ -20,13 +20,13 @@ Route::prefix('auth')->group(function () {
     Route::get('/validate', [AuthController::class, 'validateToken']);
     Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
     // View login dan register
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 });
 
-Route::middleware([ 'auth.token.refresh', 'role:ADMIN'])->group(function () {
+Route::middleware(['auth.token.refresh', 'role:ADMIN'])->group(function () {
     // Dashboard Route
     Route::get('/dashboard', [DashboardController::class, 'homeView'])->name('dashboard.index');
 
@@ -69,7 +69,7 @@ Route::middleware([ 'auth.token.refresh', 'role:ADMIN'])->group(function () {
     Route::delete('/transit-points/{id}', [TransitPointController::class, 'destroy'])->name('transit-points.destroy');
 
     // Route Management
-   
+
     Route::get('/routes', [RouteController::class, 'index'])->name('routes.index');
     Route::get('/routes/create', [RouteController::class, 'create'])->name('routes.create');
     Route::post('/routes', [RouteController::class, 'store'])->name('routes.store');
@@ -95,6 +95,6 @@ Route::get('/debug-token', function () {
         'token' => substr($token, 0, 10) . '...',
         'profile_response' => $response->json(),
         'status' => $response->status(),
-        'url' => $baseUrl . '/api/users/profile', 
+        'url' => $baseUrl . '/api/users/profile',
     ]);
 });

@@ -42,7 +42,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Plat Nomor</label>
-                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['truck_license_plate'] ?? 'Unknown' }}</p>
+                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['truck_license_plate'] ?? 'Tidak Diketahui' }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">ID Truk</label>
@@ -62,7 +62,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Nama Pekerja</label>
-                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['worker_name'] ?? 'Unknown' }}</p>
+                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['worker_name'] ?? 'Tidak Diketahui' }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">ID Pekerja</label>
@@ -82,11 +82,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Kota Asal</label>
-                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['start_city_name'] ?? 'N/A' }}</p>
+                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['start_city_name'] ?? 'Tidak Diketahui' }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Kota Tujuan</label>
-                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['end_city_name'] ?? 'N/A' }}</p>
+                                <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['end_city_name'] ?? 'Tidak Diketahui' }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-600 mb-1">ID Rute</label>
@@ -139,7 +139,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-600 mb-1">Ditambahkan Oleh</label>
-                            <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['add_by_operator_name'] ?? 'N/A' }}</p>
+                            <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">{{ $delivery['add_by_operator_name'] ?? 'Tidak Diketahui' }}</p>
                         </div>
                     </div>
 
@@ -162,18 +162,18 @@
                                                 <svg class="w-4 h-4 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                                                 </svg>
-                                                {{ $transit['transit_point']['loading_city']['name'] ?? 'N/A' }}
+                                                {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }}
                                             </span>
                                             →
                                             <span class="inline-flex items-center">
                                                 <svg class="w-4 h-4 mr-1 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                                                 </svg>
-                                                {{ $transit['transit_point']['unloading_city']['name'] ?? 'N/A' }}
+                                                {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
                                             </span>
                                         </p>
                                         <div class="flex flex-wrap gap-2 text-xs text-gray-500">
-                                            @if(isset($transit['transit_point']['estimated_duration_minute']))
+                                            @if(isset($transit['transit_point']['estimated_duration_minute']) && $transit['transit_point']['estimated_duration_minute'] !== null)
                                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                                                 Estimasi: {{ $transit['transit_point']['estimated_duration_minute'] }} menit
                                             </span>
@@ -240,7 +240,7 @@
                                     <div class="flex-1">
                                         <div class="flex items-center mb-1">
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 mr-2">
-                                                {{ ucfirst($alert['type'] ?? 'Alert') }}
+                                                {{ ucfirst($alert['type'] ?? 'Peringatan') }}
                                             </span>
                                             @if($alert['created_at'])
                                             <span class="text-xs text-red-600">
@@ -248,7 +248,7 @@
                                             </span>
                                             @endif
                                         </div>
-                                        <p class="text-sm text-red-700">{{ $alert['message'] ?? 'No message' }}</p>
+                                        <p class="text-sm text-red-700">{{ $alert['message'] ?? 'Tidak ada pesan' }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -297,7 +297,7 @@
                                     }
                                 }
                                 
-                                $total_price = $base_price + $fuel_cost + $driver_fee + $extra_cost;
+                                $total_price = $base_price + $extra_cost;
                             @endphp
 
                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
@@ -305,22 +305,6 @@
                                 <span class="font-semibold text-gray-900">Rp {{ number_format($base_price, 0, ',', '.') }}</span>
                             </div>
 
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600">Biaya BBM ({{ $distance_km }}km)</span>
-                                <span class="font-semibold text-gray-900">Rp {{ number_format($fuel_cost, 0, ',', '.') }}</span>
-                            </div>
-
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600">Fee Sopir ({{ $estimated_duration_hours }}h)</span>
-                                <span class="font-semibold text-gray-900">Rp {{ number_format($driver_fee, 0, ',', '.') }}</span>
-                            </div>
-
-                            @if($extra_cost > 0)
-                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span class="text-sm text-gray-600">Biaya Extra Transit</span>
-                                <span class="font-semibold text-gray-900">Rp {{ number_format($extra_cost, 0, ',', '.') }}</span>
-                            </div>
-                            @endif
                         </div>
 
                         <!-- Total -->

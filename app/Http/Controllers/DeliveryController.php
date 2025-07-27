@@ -351,10 +351,11 @@ class DeliveryController extends BaseApiController
     public function show(string $id)
     {
         try {
-            if (empty($this->baseUrl)) {
-                return redirect()->route('deliveries.index')->withErrors(['message' => 'Konfigurasi server tidak lengkap']);
-            }
+            // if (empty($this->baseUrl)) {
+            //     return redirect()->route('deliveries.index')->withErrors(['message' => 'Konfigurasi server tidak lengkap']);
+            // }
 
+            // Ambil data pengiriman dari API
             $deliveryResponse = $this->makeRequest('GET', "{$this->endpoint}/detail/{$id}");
             if ($deliveryResponse instanceof \Illuminate\Http\RedirectResponse) {
                 return $deliveryResponse;
@@ -363,68 +364,79 @@ class DeliveryController extends BaseApiController
                 $errorMessage = $deliveryResponse->status() === 403
                     ? 'Anda tidak memiliki izin untuk melihat pengiriman ini'
                     : 'Pengiriman tidak ditemukan';
-                Log::error('API request failed for delivery', ['status' => $deliveryResponse->status(), 'id' => $id]);
+                Log::error('API request failed for delivery', [
+                    'status' => $deliveryResponse->status(),
+                    'id' => $id,
+                    'response' => $deliveryResponse->json(),
+                ]);
                 return redirect()->route('deliveries.index')->withErrors(['message' => $errorMessage]);
             }
 
-            $delivery = $deliveryResponse->json('data') ?? [];
+            $apiData = $deliveryResponse->json('data') ?? [];
 
-            // Map camelCase to snake_case
+            // Log raw API data untuk debugging
+            Log::info('Raw delivery API response', [
+                'delivery_id' => $id,
+                'data' => $apiData,
+            ]);
+
+            // Pemetaan camelCase ke snake_case
             $delivery = [
-                'id' => $delivery['id'] ?? null,
-                'worker_id' => $delivery['workerId'] ?? null,
-                'truck_id' => $delivery['truckId'] ?? null,
-                'route_id' => $delivery['routeId'] ?? null,
-                'started_at' => $delivery['startedAt'] ?? null,
-                'finished_at' => $delivery['finishedAt'] ?? null,
+                'id' => $apiData['id'] ?? null,
+                'worker_id' => $apiData['worker_id'] ?? null,
+                'truck_id' => $apiData['truck_id'] ?? null,
+                'route_id' => $apiData['route_id'] ?? null,
+                'started_at' => $apiData['started_at'] ?? null,
+                'finished_at' => $apiData['finished_at'] ?? null,
+                'add_by_operator_id' => $apiData['add_by_operator_id'] ?? null,
                 'alerts' => array_map(function ($alert) {
                     return [
                         'id' => $alert['id'] ?? null,
                         'type' => $alert['type'] ?? null,
                         'message' => $alert['message'] ?? null,
-                        'created_at' => $alert['createdAt'] ?? null,
+                        'created_at' => $alert['created_at'] ?? null,
                     ];
-                }, $delivery['alerts'] ?? []),
+                }, $apiData['alerts'] ?? []),
                 'transits' => array_map(function ($transit) {
-                    $transit_point = $transit['transitPoint'] ?? [];
-                    $action_by = $transit['actionByOperatorId'] ?? [];
+                    $transit_point = $transit['transit_point'] ?? [];
+                    $action_by = $transit['action_by_operator_id'] ?? [];
                     return [
                         'id' => $transit['id'] ?? null,
                         'transit_point' => [
                             'id' => $transit_point['id'] ?? null,
                             'loading_city' => [
-                                'id' => $transit_point['loadingCity']['id'] ?? null,
-                                'name' => $transit_point['loadingCity']['name'] ?? null,
-                                'latitude' => $transit_point['loadingCity']['latitude'] ?? null,
-                                'longitude' => $transit_point['loadingCity']['longitude'] ?? null,
-                                'country' => $transit_point['loadingCity']['country'] ?? null,
-                                'created_at' => $transit_point['loadingCity']['createdAt'] ?? null,
+                                'id' => $transit_point['loading_city']['id'] ?? null,
+                                'name' => $transit_point['loading_city']['name'] ?? 'Unknown',
+                                'latitude' => $transit_point['loading_city']['latitude'] ?? null,
+                                'longitude' => $transit_point['loading_city']['longitude'] ?? null,
+                                'country' => $transit_point['loading_city']['country'] ?? null,
+                                'created_at' => $transit_point['loading_city']['created_at'] ?? null,
                             ],
                             'unloading_city' => [
-                                'id' => $transit_point['unloadingCity']['id'] ?? null,
-                                'name' => $transit_point['unloadingCity']['name'] ?? null,
-                                'latitude' => $transit_point['unloadingCity']['latitude'] ?? null,
-                                'longitude' => $transit_point['unloadingCity']['longitude'] ?? null,
-                                'country' => $transit_point['unloadingCity']['country'] ?? null,
-                                'created_at' => $transit_point['unloadingCity']['createdAt'] ?? null,
+                                'id' => $transit_point['unloading_city']['id'] ?? null,
+                                'name' => $transit_point['unloading_city']['name'] ?? 'Unknown',
+                                'latitude' => $transit_point['unloading_city']['latitude'] ?? null,
+                                'longitude' => $transit_point['unloading_city']['longitude'] ?? null,
+                                'country' => $transit_point['unloading_city']['country'] ?? null,
+                                'created_at' => $transit_point['unloading_city']['created_at'] ?? null,
                             ],
-                            'estimated_duration_minute' => $transit_point['estimatedDurationMinute'] ?? null,
-                            'extra_cost' => $transit_point['extraCost'] ?? null,
-                            'created_at' => $transit_point['createdAt'] ?? null,
-                            'is_active' => $transit_point['isActive'] ?? null,
+                            'estimated_duration_minute' => $transit_point['estimated_duration_minute'] ?? null,
+                            'extra_cost' => $transit_point['extra_cost'] ?? null,
+                            'created_at' => $transit_point['created_at'] ?? null,
+                            'is_active' => $transit_point['is_active'] ?? false,
                         ],
-                        'arrived_at' => $transit['arrivedAt'] ?? null,
-                        'is_accepted' => $transit['isAccepted'] ?? null,
-                        'actioned_at' => $transit['actionedAt'] ?? null,
+                        'arrived_at' => $transit['arrived_at'] ?? null,
+                        'is_accepted' => $transit['is_accepted'] ?? false,
+                        'actioned_at' => $transit['actioned_at'] ?? null,
                         'reason' => $transit['reason'] ?? null,
                         'action_by_id' => $action_by['id'] ?? null,
-                        'action_by_name' => isset($action_by['id']) ? $this->getOperatorName($action_by['id']) : 'N/A',
+                        'action_by_name' => isset($action_by['id']) ? $action_by['username'] ?? $this->getOperatorName($action_by['id']) : 'N/A',
                     ];
-                }, $delivery['transits'] ?? []),
-                'add_by_operator_id' => $delivery['addByOperatorId'] ?? null,
+                }, $apiData['transits'] ?? []),
             ];
 
-            // Cache supporting data
+
+            // Cache data pendukung
             $cities = Cache::remember('cities', 3600, function () {
                 $response = $this->makeRequest('GET', $this->baseUrl . '/api/cities');
                 if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
@@ -461,7 +473,7 @@ class DeliveryController extends BaseApiController
                 return collect($response->json('data') ?? [])->keyBy('id');
             });
 
-            // Enrich delivery
+            // Enrich delivery dengan data tambahan
             $route = $routes->get($delivery['route_id'] ?? '', []) ?: [];
             if (!is_array($route)) {
                 Log::warning('Invalid route data for delivery', [
@@ -471,7 +483,6 @@ class DeliveryController extends BaseApiController
                 $route = [];
             }
 
-            // Use start_city_name and end_city_name from route, fallback to cities
             $delivery['start_city_name'] = $route['start_city_name'] ?? $cities->get($route['start_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
             $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
             $delivery['base_price'] = $route['base_price'] ?? 0;
@@ -481,12 +492,19 @@ class DeliveryController extends BaseApiController
             $delivery['worker_name'] = $workers->get($delivery['worker_id'] ?? null, ['username' => 'Unknown'])['username'] ?? 'Unknown';
             $delivery['add_by_operator_name'] = isset($delivery['add_by_operator_id']) ? $this->getOperatorName($delivery['add_by_operator_id']) : 'N/A';
 
-            Log::info('Delivery data', ['delivery' => $delivery]);
+            // Log data akhir yang akan dikirim ke view
+            Log::info('Final delivery data sent to view', [
+                'delivery_id' => $delivery['id'] ?? 'unknown',
+                'delivery' => $delivery,
+            ]);
 
             return view('deliveries.show', compact('delivery'));
         } catch (\Exception $e) {
-            Log::error('Error fetching delivery: ' . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'id' => $id]);
-            return redirect()->route('deliveries.index')->with(['error' => 'Gagal mengambil detail pengiriman']);
+            Log::error('Error fetching delivery: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'id' => $id,
+            ]);
+            return redirect()->route('deliveries.index')->with(['error' => 'Gagal mengambil detail pengiriman: ' . $e->getMessage()]);
         }
     }
 
