@@ -60,7 +60,7 @@
                                 {{ $delivery['started_at'] ? 'Aktif' : 'Selesai' }}
                             </span>
                         </td>
-                        <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">
+                        <td class="px-6 py-4 text-sm border-b border-gray-100  flex flex-col space-y-2 items-center justify-center">
                             <a href="{{ route('deliveries.show', $delivery['id']) }}" class="bg-blue-500 text-white px-4 py-1.5 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Detail</a>
                             @if ($delivery['started_at'])
                                 <form method="POST" action="{{ route('deliveries.finish', $delivery['id']) }}" class="inline" onsubmit="return confirm('Yakin ingin menyelesaikan pengiriman ini?')">

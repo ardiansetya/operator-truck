@@ -311,7 +311,6 @@ class DeliveryController extends BaseApiController
                 'longitude' => (float) $validated['longitude'],
             ];
 
-            dd($payload);
 
 
             Log::info('Sending payload to POST /api/delivery', [
@@ -356,7 +355,7 @@ class DeliveryController extends BaseApiController
                 return redirect()->route('deliveries.index')->withErrors(['message' => 'Konfigurasi server tidak lengkap']);
             }
 
-            $deliveryResponse = $this->makeRequest('GET', "{$this->endpoint}/{$id}");
+            $deliveryResponse = $this->makeRequest('GET', "{$this->endpoint}/detail/{$id}");
             if ($deliveryResponse instanceof \Illuminate\Http\RedirectResponse) {
                 return $deliveryResponse;
             }
