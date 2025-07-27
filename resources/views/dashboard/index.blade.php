@@ -47,7 +47,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-medium text-gray-700">Pengiriman Aktif</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $active_deliveries_count ?? 0 }}</p>
+                <p class="text-3xl font-semibold text-gray-800">{{ $activeDeliveriesCount ?? 0 }}</p>
                 <p class="text-sm text-gray-500">Pengiriman sedang berlangsung</p>
             </div>
         </div>
