@@ -515,7 +515,7 @@ class DeliveryController extends BaseApiController
                 return back()->withErrors(['message' => 'Konfigurasi server tidak lengkap']);
             }
 
-            $response = $this->makeRequest('POST', "{$this->endpoint}/finish/{$id}");
+            $response = $this->makeRequest('PATCH', "{$this->endpoint}/finish/{$id}");
             if ($response instanceof \Illuminate\Http\RedirectResponse) {
                 return $response;
             }
