@@ -61,7 +61,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-medium text-gray-700">Transit Belum Dikonfirmasi</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $unconfirmed_transits ?? 0 }}</p>
+                <p class="text-3xl font-semibold text-gray-800">{{ $unconfirmedTransits ?? 0 }}</p>
                 <p class="text-sm text-gray-500">Menunggu persetujuan</p>
             </div>
         </div>

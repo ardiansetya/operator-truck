@@ -22,11 +22,14 @@ class DashboardController extends BaseApiController
             $deliveriesResponse = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/delivery/active');
             $activeDeliveriesCount = $deliveriesResponse->successful() ? count($deliveriesResponse->json('data') ?? []) : 0;
 
+            $transitPending = $this->getAuthenticatedHttpClient()->get($this->baseUrl . '/api/delivery/transit/pending');
+            $activeDeliveriesCount = $transitPending->successful() ? count($transitPending->json('data') ?? []) : 0;
+
             return view('dashboard.index', [
                 'citiesCount' => $citiesCount,
                 'activeTrucksCount' => $activeTrucksCount,
                 'activeDeliveriesCount' => $activeDeliveriesCount,
-                // 'unconfirmedTransits' => $activeDeliveriesCount, // Same as active deliveries
+                'unconfirmedTransits' => $activeDeliveriesCount, 
             ]);
         } catch (\Exception $e) {
             Log::error('Error fetching dashboard data: ' . $e->getMessage());
