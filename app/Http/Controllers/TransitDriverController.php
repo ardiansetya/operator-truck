@@ -19,7 +19,7 @@ class TransitDriverController extends BaseApiController
         $this->transitEndpoint = $this->baseUrl . '/api/delivery/transit';
         $this->deliveryEndpoint = $this->baseUrl . '/api/delivery/detail';
         $this->truckEndpoint = $this->baseUrl . '/api/trucks';
-        $this->routeEndpoint = $this->baseUrl . '/api/routes';
+        $this->routeEndpoint = $this->baseUrl . '/api/transit-points';
         $this->userEndpoint = $this->baseUrl . '/api/users/profile';
     }
 
@@ -51,7 +51,7 @@ class TransitDriverController extends BaseApiController
                 $routeStart = '-';
                 $routeEnd = '-';
                 $operatorName = '-';
-                $tariff = 0;
+                $tarif = 0;
 
                 // --- 1️⃣ Fetch Delivery ---
                 $deliveryUrl = "{$this->deliveryEndpoint}/{$transit['delivery_id']}";
@@ -67,7 +67,17 @@ class TransitDriverController extends BaseApiController
                 $deliveryData = $deliveryResp->json('data');
                 $truckId = $deliveryData['truck_id'] ?? null;
                 $routeId = $deliveryData['route_id'] ?? null;
-                $tariff = $deliveryData['tariff'] ?? 0;
+
+                // ✅ Ambil tarif dari extra_cost
+                $tarif = 0;
+                if (!empty($deliveryData['transits']) && is_array($deliveryData['transits'])) {
+                    foreach ($deliveryData['transits'] as $t) {
+                        if (isset($t['transit_point']['extra_cost'])) {
+                            $tarif = $t['transit_point']['extra_cost'];
+                        }
+                    }
+                }
+
 
                 // --- 2️⃣ Fetch Truck ---
                 if ($truckId) {
@@ -85,15 +95,15 @@ class TransitDriverController extends BaseApiController
 
                 // --- 3️⃣ Fetch Route ---
                 if ($routeId) {
-                    $routeUrl = "{$this->routeEndpoint}/{$routeId}";
+                    $routeUrl = "{$this->routeEndpoint}/{$transit['transit_point_id']}";
                     Log::info('[DEBUG] Fetching route', ['url' => $routeUrl]);
                     $routeResp = $this->getAuthenticatedHttpClient()->get($routeUrl);
                     Log::info('[DEBUG] Route response', ['status' => $routeResp->status()]);
 
                     if ($routeResp->successful()) {
                         $route = $routeResp->json('data');
-                        $routeStart = $route['start_city_name'] ?? '-';
-                        $routeEnd = $route['end_city_name'] ?? '-';
+                        $routeStart = $route['loading_city']['name'] ?? '-';
+                        $routeEnd = $route['unloading_city']['name'] ?? '-';
                     }
                 }
 
@@ -120,7 +130,7 @@ class TransitDriverController extends BaseApiController
                     'truck_model' => $truckModel,
                     'route_start' => $routeStart,
                     'route_end' => $routeEnd,
-                    'tariff' => $tariff,
+                    'tarif' => $tarif,
                     'status' => $transit['is_accepted'] ? 'Diterima' : 'Menunggu',
                     'operator' => $operatorName,
                 ];
@@ -158,18 +168,32 @@ class TransitDriverController extends BaseApiController
                 'reason' => $validated['reason'] ?? ''
             ];
 
+            Log::info('[TransitDriver] Sending accept/reject request', $payload);
+
             $response = $this->getAuthenticatedHttpClient()
                 ->patch("{$this->transitEndpoint}/accept-or-reject", $payload);
 
             if ($response->successful()) {
+                Log::info('[TransitDriver] Action successful', [
+                    'id' => $validated['delivery_transit_id'],
+                    'status' => $validated['is_accepted'] ? 'accepted' : 'rejected'
+                ]);
                 return redirect()->route('transit-drivers.index')
                     ->with('success', 'Aksi berhasil dilakukan');
             }
 
+            Log::warning('[TransitDriver] Action failed', [
+                'status_code' => $response->status(),
+                'response' => $response->json()
+            ]);
+
             return redirect()->route('transit-drivers.index')
-                ->withErrors(['message' => 'Gagal melakukan aksi']);
+                ->withErrors(['message' => 'Gagal melakukan aksi, coba lagi']);
         } catch (\Exception $e) {
-            Log::error('Error processing transit action: ' . $e->getMessage());
+            Log::error('[TransitDriver] Error processing transit action', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->route('transit-drivers.index')
                 ->withErrors(['message' => 'Terjadi kesalahan sistem']);
         }

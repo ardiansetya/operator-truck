@@ -8,6 +8,36 @@
                 Daftar Transit Point
             </a>
         </div>
+        {{-- ✅ Alert Message Section --}}
+        @if (session('success'))
+            <div class="mb-6 p-4 bg-green-100 text-green-700 border border-green-300 rounded-lg shadow-sm">
+                ✅ {{ session('success') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg shadow-sm">
+                ⚠️ {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg shadow-sm">
+                <strong>Terjadi kesalahan:</strong>
+                <ul class="mt-2 list-disc list-inside">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if (isset($error))
+            <div class="mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg shadow-sm">
+                ⚠️ {{ $error }}
+            </div>
+        @endif
+
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white border border-gray-100 rounded-xl shadow-sm">
                 <thead class="bg-gray-50">
@@ -27,23 +57,28 @@
                     @forelse($drivers as $i => $driver)
                         <tr class="hover:bg-gray-50 transition-colors duration-150">
                             <td class="px-6 py-4">{{ $i + 1 }}</td>
-                            <td class="px-6 py-4">{{ $driver['license_plate'] }}</td>
-                            <td class="px-6 py-4">{{ $driver['truck_model'] }}</td>
-                            <td class="px-6 py-4">{{ $driver['route_start'] }}</td>
-                            <td class="px-6 py-4">{{ $driver['route_end'] }}</td>
-                            <td class="px-6 py-4">{{ number_format($driver['tariff'], 0, ',', '.') }}</td>
-                            <td class="px-6 py-4">{{ $driver['status'] }}</td>
-                            <td class="px-6 py-4">{{ $driver['operator'] }}</td>
+                            <td class="px-6 py-4">{{ $driver['license_plate'] ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ $driver['truck_model'] ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ $driver['route_start'] ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ $driver['route_end'] ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ number_format($driver['tarif'] ?? 0, 0, ',', '.') }}</td>
+                            <td class="px-6 py-4">{{ $driver['status'] ?? '-' }}</td>
+                            <td class="px-6 py-4">{{ $driver['operator'] ?? '-' }}</td>
                             <td class="px-6 py-4 space-x-2">
+                                {{-- Accept --}}
                                 <form method="POST" action="{{ route('transit-drivers.accept-or-reject') }}"
                                     class="inline">
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="delivery_transit_id" value="{{ $driver['id'] }}">
                                     <input type="hidden" name="is_accepted" value="true">
-                                    <button class="bg-green-500 text-white px-3 py-1 rounded-lg">Acc</button>
+                                    <button type="submit" title="Terima"
+                                        class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">
+                                        Acc
+                                    </button>
                                 </form>
 
+                                {{-- Reject --}}
                                 <form method="POST" action="{{ route('transit-drivers.accept-or-reject') }}"
                                     class="inline">
                                     @csrf
@@ -51,11 +86,12 @@
                                     <input type="hidden" name="delivery_transit_id" value="{{ $driver['id'] }}">
                                     <input type="hidden" name="is_accepted" value="false">
                                     <input type="hidden" name="reason" value="Ditolak oleh operator">
-                                    <button class="bg-red-500 text-white px-3 py-1 rounded-lg">Tolak</button>
+                                    <button type="submit" title="Tolak"
+                                        class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600">
+                                        Tolak
+                                    </button>
                                 </form>
-
                             </td>
-
                         </tr>
                     @empty
                         <tr>
@@ -63,7 +99,6 @@
                         </tr>
                     @endforelse
                 </tbody>
-
             </table>
         </div>
     </div>
