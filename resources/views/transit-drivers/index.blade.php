@@ -22,21 +22,18 @@
         @endif
 
         @if ($errors->any())
-            <div class="mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg shadow-sm">
-                <strong>Terjadi kesalahan:</strong>
-                <ul class="mt-2 list-disc list-inside">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
+            @foreach ($errors->all() as $error)
+                <div class="mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg shadow-sm">
+                    ⚠️ {{ $error }}
+                </div>
+            @endforeach
         @endif
 
-        @if (isset($error))
+        {{-- @if (isset($error))
             <div class="mb-6 p-4 bg-red-100 text-red-700 border border-red-300 rounded-lg shadow-sm">
                 ⚠️ {{ $error }}
             </div>
-        @endif
+        @endif --}}
 
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white border border-gray-100 rounded-xl shadow-sm">
@@ -72,6 +69,7 @@
                                     @method('PATCH')
                                     <input type="hidden" name="delivery_transit_id" value="{{ $driver['id'] }}">
                                     <input type="hidden" name="is_accepted" value="true">
+                                    <input type="hidden" name="reason" value="Diterima oleh operator">
                                     <button type="submit" title="Terima"
                                         class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">
                                         Acc

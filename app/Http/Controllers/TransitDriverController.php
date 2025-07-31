@@ -157,16 +157,21 @@ class TransitDriverController extends BaseApiController
     {
         $validated = $request->validate([
             'delivery_transit_id' => 'required|string',
-            'is_accepted' => 'required|boolean',
+            'is_accepted' => 'required|in:true,false,1,0',
             'reason' => 'nullable|string'
         ]);
+        
 
         try {
+            // Konversi ke boolean
+            $isAccepted = filter_var($validated['is_accepted'], FILTER_VALIDATE_BOOLEAN);
+
             $payload = [
                 'delivery_transit_id' => $validated['delivery_transit_id'],
-                'is_accepted' => $validated['is_accepted'],
+                'is_accepted' => $isAccepted,
                 'reason' => $validated['reason'] ?? ''
             ];
+
 
             Log::info('[TransitDriver] Sending accept/reject request', $payload);
 
@@ -176,7 +181,7 @@ class TransitDriverController extends BaseApiController
             if ($response->successful()) {
                 Log::info('[TransitDriver] Action successful', [
                     'id' => $validated['delivery_transit_id'],
-                    'status' => $validated['is_accepted'] ? 'accepted' : 'rejected'
+                    'status' => $isAccepted ? 'accepted' : 'rejected'
                 ]);
                 return redirect()->route('transit-drivers.index')
                     ->with('success', 'Aksi berhasil dilakukan');
