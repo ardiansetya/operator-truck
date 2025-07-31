@@ -2,17 +2,8 @@
 @section('content')
 <div class="container mx-auto px-6 py-8">
     <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-6">Daftar Pengiriman</h1>
-        <div class="flex gap-5">
-
-            <a href="{{ route('deliveries.history') }}" class="bg-yellow-500 text-white mb-5 px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">
-                History Pengiriman
-            </a>
-            <a href="{{ route('deliveries.create') }}" class="bg-blue-500 text-white mb-5 px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">
-                Tambah Pengiriman
-            </a>
-
-        </div>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-6">History Pengiriman</h1>
+       
     </div>
 
     @if (session('success'))

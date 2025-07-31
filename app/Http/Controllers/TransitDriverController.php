@@ -20,7 +20,7 @@ class TransitDriverController extends BaseApiController
         $this->deliveryEndpoint = $this->baseUrl . '/api/delivery/detail';
         $this->truckEndpoint = $this->baseUrl . '/api/trucks';
         $this->routeEndpoint = $this->baseUrl . '/api/transit-points';
-        $this->userEndpoint = $this->baseUrl . '/api/users/profile';
+        $this->userEndpoint = $this->baseUrl . '/api/users';
     }
 
     /**
@@ -131,10 +131,20 @@ class TransitDriverController extends BaseApiController
                     'route_start' => $routeStart,
                     'route_end' => $routeEnd,
                     'tarif' => $tarif,
-                    'status' => $transit['is_accepted'] ? 'Diterima' : 'Menunggu',
+                    'status' => $transit['is_accepted'] ? 'Diterima' : 'Ditolak',
                     'operator' => $operatorName,
                 ];
             }
+
+            usort($drivers, function ($a, $b) {
+                // Urutkan: yang statusnya "Menunggu" (belum diterima) di atas
+                if ($a['status'] === 'Menunggu' && $b['status'] !== 'Menunggu') {
+                    return -1;
+                } elseif ($a['status'] !== 'Menunggu' && $b['status'] === 'Menunggu') {
+                    return 1;
+                }
+                return 0; // jika sama
+            });
 
             
 

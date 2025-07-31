@@ -224,8 +224,8 @@
                                                     </div>
                                                 </div>
                                                 <span
-                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $transit['is_accepted'] ?? false ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                                    {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Menunggu' }}
+                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $transit['is_accepted'] ?? false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Ditolak' }}
                                                 </span>
                                             </div>
 
@@ -249,7 +249,7 @@
 
                                             @if ($transit['reason'])
                                                 <div class="mt-2 p-2 bg-gray-50 rounded text-xs">
-                                                    <span class="font-medium text-gray-600">Alasan:</span>
+                                                    <span class="font-medium text-gray-600">Pesan:</span>
                                                     <p class="text-gray-700 mt-1">{{ $transit['reason'] }}</p>
                                                 </div>
                                             @endif
@@ -333,16 +333,15 @@
                             <div class="space-y-3">
                                 @php
                                     $base_price = $delivery['base_price'] ?? 0;
-                                    $distance_km = $delivery['distance_km'] ?? 0;
-                                    $estimated_duration_hours = $delivery['estimated_duration_hours'] ?? 0;
-                                    $fuel_cost = $distance_km * 1500; // Estimasi biaya BBM per km
-                                    $driver_fee = $estimated_duration_hours * 25000; // Fee sopir per jam
 
                                     // Tambahkan biaya extra dari transit points
+                                    // ✅ Tambahkan biaya extra hanya untuk transit yang diterima
                                     $extra_cost = 0;
                                     if (!empty($delivery['transits'])) {
                                         foreach ($delivery['transits'] as $transit) {
-                                            $extra_cost += $transit['transit_point']['extra_cost'] ?? 0;
+                                            if (!empty($transit['is_accepted']) && $transit['is_accepted'] === true) {
+                                                $extra_cost += $transit['transit_point']['extra_cost'] ?? 0;
+                                            }
                                         }
                                     }
 
@@ -356,13 +355,17 @@
                                 </div>
 
                                 @foreach ($delivery['transits'] as $transit)
-                                    <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span class="text-sm text-gray-600">
-                                            {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }} - {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
-                                        </span>
-                                        <span class="font-semibold text-gray-900">Rp
-                                            {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}</span>
-                                    </div>
+                                    @if ($transit['is_accepted'])
+                                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                            <span class="text-sm text-gray-600">
+                                                {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }}
+                                                -
+                                                {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
+                                            </span>
+                                            <span class="font-semibold text-gray-900">Rp
+                                                {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}</span>
+                                        </div>
+                                    @endif
                                 @endforeach
 
                             </div>

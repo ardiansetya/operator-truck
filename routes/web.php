@@ -54,11 +54,13 @@ Route::middleware(['auth.token.refresh', 'role:ADMIN'])->group(function () {
 
     // Delivery Routes
     Route::get('/deliveries', [DeliveryController::class, 'index'])->name('deliveries.index');
+    Route::get('/deliveries/history', [DeliveryController::class, 'history'])->name('deliveries.history');
     Route::get('/deliveries/create', [DeliveryController::class, 'create'])->name('deliveries.create');
     Route::post('/deliveries', [DeliveryController::class, 'store'])->name('deliveries.store');
     Route::get('/deliveries/{id}', [DeliveryController::class, 'show'])->name('deliveries.show');
     Route::patch('/deliveries/finish/{id}', [DeliveryController::class, 'finish'])->name('deliveries.finish');
     Route::delete('/deliveries/{id}', [DeliveryController::class, 'destroy'])->name('deliveries.destroy');
+    
 
     // Transit Point Routes
     Route::get('/transit-points', [TransitPointController::class, 'index'])->name('transit-points.index');
