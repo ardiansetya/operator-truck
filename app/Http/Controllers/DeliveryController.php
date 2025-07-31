@@ -399,40 +399,74 @@ class DeliveryController extends BaseApiController
                 }, $apiData['alerts'] ?? []),
                 'transits' => array_map(function ($transit) {
                     $transit_point = $transit['transit_point'] ?? [];
-                    $action_by = $transit['action_by_operator_id'] ?? [];
+
+                    // Default data kota
+                    $loadingCity = ['id' => null, 'name' => 'Unknown'];
+                    $unloadingCity = ['id' => null, 'name' => 'Unknown'];
+
+                    // Ambil nama kota Loading
+                    if (!empty($transit_point['loading_city_id'])) {
+                        try {
+                            $cityResp = $this->makeRequest('GET', $this->baseUrl . '/api/cities/' . $transit_point['loading_city_id']);
+                            if ($cityResp->successful()) {
+                                $loadingCity = $cityResp->json('data') ?? $loadingCity;
+                            }
+                        } catch (\Exception $e) {
+                            Log::warning('Gagal mengambil data loading city', [
+                                'id' => $transit_point['loading_city_id'],
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
+                    // Ambil nama kota Unloading
+                    if (!empty($transit_point['unloading_city_id'])) {
+                        try {
+                            $cityResp = $this->makeRequest('GET', $this->baseUrl . '/api/cities/' . $transit_point['unloading_city_id']);
+                            if ($cityResp->successful()) {
+                                $unloadingCity = $cityResp->json('data') ?? $unloadingCity;
+                            }
+                        } catch (\Exception $e) {
+                            Log::warning('Gagal mengambil data unloading city', [
+                                'id' => $transit_point['unloading_city_id'],
+                                'error' => $e->getMessage(),
+                            ]);
+                        }
+                    }
+
                     return [
                         'id' => $transit['id'] ?? null,
                         'transit_point' => [
                             'id' => $transit_point['id'] ?? null,
                             'loading_city' => [
-                                'id' => $transit_point['loading_city']['id'] ?? null,
-                                'name' => $transit_point['loading_city']['name'] ?? 'Unknown',
-                                'latitude' => $transit_point['loading_city']['latitude'] ?? null,
-                                'longitude' => $transit_point['loading_city']['longitude'] ?? null,
-                                'country' => $transit_point['loading_city']['country'] ?? null,
-                                'created_at' => $transit_point['loading_city']['created_at'] ?? null,
+                                'id' => $loadingCity['id'],
+                                'name' => $loadingCity['name'],
+                                'latitude' => $loadingCity['latitude'] ?? null,
+                                'longitude' => $loadingCity['longitude'] ?? null,
+                                'country' => $loadingCity['country'] ?? null,
                             ],
                             'unloading_city' => [
-                                'id' => $transit_point['unloading_city']['id'] ?? null,
-                                'name' => $transit_point['unloading_city']['name'] ?? 'Unknown',
-                                'latitude' => $transit_point['unloading_city']['latitude'] ?? null,
-                                'longitude' => $transit_point['unloading_city']['longitude'] ?? null,
-                                'country' => $transit_point['unloading_city']['country'] ?? null,
-                                'created_at' => $transit_point['unloading_city']['created_at'] ?? null,
+                                'id' => $unloadingCity['id'],
+                                'name' => $unloadingCity['name'],
+                                'latitude' => $unloadingCity['latitude'] ?? null,
+                                'longitude' => $unloadingCity['longitude'] ?? null,
+                                'country' => $unloadingCity['country'] ?? null,
                             ],
                             'estimated_duration_minute' => $transit_point['estimated_duration_minute'] ?? null,
                             'extra_cost' => $transit_point['extra_cost'] ?? null,
-                            'created_at' => $transit_point['created_at'] ?? null,
                             'is_active' => $transit_point['is_active'] ?? false,
                         ],
                         'arrived_at' => $transit['arrived_at'] ?? null,
                         'is_accepted' => $transit['is_accepted'] ?? false,
                         'actioned_at' => $transit['actioned_at'] ?? null,
                         'reason' => $transit['reason'] ?? null,
-                        'action_by_id' => $action_by['id'] ?? null,
-                        'action_by_name' => isset($action_by['id']) ? $action_by['username'] ?? $this->getOperatorName($action_by['id']) : 'N/A',
+                        'action_by_id' => $transit['action_by_operator_id'] ?? null,
+                        'action_by_name' => $transit['action_by_operator_id']
+                            ? $this->getOperatorName($transit['action_by_operator_id'])
+                            : 'N/A',
                     ];
                 }, $apiData['transits'] ?? []),
+
             ];
 
 

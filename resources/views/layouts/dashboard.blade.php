@@ -30,9 +30,8 @@
                             class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('routes.*') ? 'bg-blue-50 text-blue-600' : '' }}">Routes</a>
                         <a href="{{ route('deliveries.index') }}"
                             class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('deliveries.*') ? 'bg-blue-50 text-blue-600' : '' }}">Deliveries</a>
-                        <a href="{{ route('transit-points.index') }}"
-                            class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('transit-points.*') ? 'bg-blue-50 text-blue-600' : '' }}">Transit
-                            Points</a>
+                        <a href="{{ route('transit-drivers.index') }}"
+                            class="text-gray-600 hover:text-blue-600 font-medium text-sm py-2 px-3 rounded-lg transition duration-200 ease-in-out {{ Route::is('transit-drivers.*') ? 'bg-blue-50 text-blue-600' : '' }}">Transit Drivers</a>
 
 
                     </nav>

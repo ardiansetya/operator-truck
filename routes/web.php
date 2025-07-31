@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DeliveryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RouteController;
+use App\Http\Controllers\TransitDriverController;
 use App\Http\Controllers\TransitPointController;
 use App\Http\Controllers\TruckController;
 use Illuminate\Support\Facades\Route;
@@ -69,7 +70,6 @@ Route::middleware(['auth.token.refresh', 'role:ADMIN'])->group(function () {
     Route::delete('/transit-points/{id}', [TransitPointController::class, 'destroy'])->name('transit-points.destroy');
 
     // Route Management
-
     Route::get('/routes', [RouteController::class, 'index'])->name('routes.index');
     Route::get('/routes/create', [RouteController::class, 'create'])->name('routes.create');
     Route::post('/routes', [RouteController::class, 'store'])->name('routes.store');
@@ -77,6 +77,14 @@ Route::middleware(['auth.token.refresh', 'role:ADMIN'])->group(function () {
     Route::get('/routes/{id}/edit', [RouteController::class, 'edit'])->name('routes.edit');
     Route::put('/routes/{id}', [RouteController::class, 'update'])->name('routes.update');
     Route::delete('/routes/{id}', [RouteController::class, 'destroy'])->name('routes.destroy');
+
+    // Transit Driver
+    Route::get('/transit-drivers', [TransitDriverController::class, 'index'])->name('transit-drivers.index');
+    Route::patch(
+        '/transit-drivers/accept-or-reject',
+        [TransitDriverController::class, 'acceptOrReject']
+    )
+        ->name('transit-drivers.accept-or-reject');
 });
 
 Route::get('/debug-token', function () {
