@@ -150,6 +150,7 @@ class TransitPointController extends BaseApiController
                 return redirect()->route('transit-points.index')->withErrors(['message' => 'Transit point tidak ditemukan']);
             }
             $transitPoint = $transitResponse->json('data') ?? [];
+            Log::debug('Transit point data:', $transitPoint);
 
             $citiesResponse = $this->makeRequest('get', $this->baseUrl . '/api/cities');
             if ($citiesResponse instanceof \Illuminate\Http\RedirectResponse) {
@@ -174,20 +175,34 @@ class TransitPointController extends BaseApiController
             if (empty($this->baseUrl)) {
                 return back()->withErrors(['message' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.']);
             }
+
             $validated = $request->validate([
-                'loadingCityId' => 'required|integer',
-                'unloadingCityId' => 'required|integer',
-                'estimatedDurationMinute' => 'required|integer|min:0',
-                'extraCost' => 'required|numeric|min:0',
+                'loading_city_id' => 'required|integer',
+                'unloading_city_id' => 'required|integer',
+                'estimated_duration_minute' => 'required|integer|min:0',
+                'extra_cost' => 'required|numeric|min:0',
+                'is_active' => 'required|boolean'
             ]);
 
-            $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", $validated);
+            
+
+            $payload = [
+                'loading_city_id' => $validated['loading_city_id'],
+                'unloading_city_id' => $validated['unloading_city_id'],
+                'estimated_duration_minute' => $validated['estimated_duration_minute'],
+                'extra_cost' => $validated['extra_cost'],
+                'is_active' => (bool) $validated['is_active'],
+            ];
+
+            $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", $payload);
+
             return $this->handleApiResponse($response, 'Transit point berhasil diperbarui', 'Gagal memperbarui transit point');
         } catch (\Exception $e) {
             Log::error('Error updating transit point: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
+
 
     public function destroy(string $id)
     {

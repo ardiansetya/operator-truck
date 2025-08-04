@@ -3,7 +3,7 @@
     <div class="container mx-auto px-6 py-8">
         <div class="flex justify-between items-center">
             <h1 class="text-2xl font-semibold text-gray-800 mb-6">Daftar Driver Transit</h1>
-            <a  href="{{ route('transit-points.index') }}"
+            <a href="{{ route('transit-points.index') }}"
                 class="bg-blue-500 mb-5 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">
                 Daftar Transit Point
             </a>
@@ -64,17 +64,49 @@
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ $driver['status'] }}</span>
                                 @elseif($driver['status'] === 'Ditolak')
-                              
-                                         <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ $driver['status'] }}</span>
+                                     <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ $driver['status'] ?? 'Ditolak' }}</span>
                                 @else
-                                         <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ $driver['status']  ?? 'Menunggu' }}</span>
+                                 <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ $driver['status'] ?? 'Menunggu' }}</span>
                                 @endif
                             </td>
                             <td class="px-6 py-4">{{ $driver['operator'] ?? '-' }}</td>
-                            @if ($driver['status'] === 'Diterima' || $driver['status'] === 'Ditolak')
-                            <td class="px-6 py-4 space-x-2">
+                            @if ($driver['status'] === "Menunggu")
+                                <td class="px-6 py-4 space-x-2">
+                                    <div class="">
+                                        {{-- Accept --}}
+                                        <form method="POST" action="{{ route('transit-drivers.accept-or-reject') }}"
+                                            class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="delivery_transit_id" value="{{ $driver['id'] }}">
+                                            <input type="hidden" name="is_accepted" value="true">
+                                            <input type="hidden" name="reason" value="Diterima oleh operator">
+                                            <button type="submit" title="Terima"
+                                                class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">
+                                                Acc
+                                            </button>
+                                        </form>
+
+                                        {{-- Reject --}}
+                                        <form method="POST" action="{{ route('transit-drivers.accept-or-reject') }}"
+                                            class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="delivery_transit_id" value="{{ $driver['id'] }}">
+                                            <input type="hidden" name="is_accepted" value="false">
+                                            <input type="hidden" name="reason" value="Ditolak oleh operator">
+                                            <button type="submit" title="Tolak"
+                                                class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600">
+                                                Tolak
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </td>
+                            @else
+                                <td class="px-6 py-4 space-x-2">
                                     <div class="hidden">
                                         {{-- Accept --}}
                                         <form method="POST" action="{{ route('transit-drivers.accept-or-reject') }}"
@@ -104,9 +136,9 @@
                                             </button>
                                         </form>
                                     </div>
-                                    
+
                                 </td>
-                                @endif
+                            @endif
                         </tr>
                     @empty
                         <tr>

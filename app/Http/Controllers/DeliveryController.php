@@ -522,6 +522,7 @@ class DeliveryController extends BaseApiController
             $delivery['base_price'] = $route['base_price'] ?? 0;
             $delivery['distance_km'] = $route['distance_km'] ?? 0;
             $delivery['estimated_duration_hours'] = $route['estimated_duration_hours'] ?? 0;
+            $delivery['truck_model'] = $trucks->get($delivery['truck_id'] ?? null, ['model' => 'Unknown'])['model'] ?? 'Unknown';
             $delivery['truck_license_plate'] = $trucks->get($delivery['truck_id'] ?? null, ['license_plate' => 'Unknown'])['license_plate'] ?? 'Unknown';
             $delivery['worker_name'] = $workers->get($delivery['worker_id'] ?? null, ['username' => 'Unknown'])['username'] ?? 'Unknown';
             $delivery['add_by_operator_name'] = isset($delivery['add_by_operator_id']) ? $this->getOperatorName($delivery['add_by_operator_id']) : 'N/A';

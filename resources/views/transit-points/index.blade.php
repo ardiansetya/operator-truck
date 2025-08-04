@@ -28,6 +28,7 @@
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Pembongkaran</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Estimasi Waktu</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Biaya Ekstra</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Status</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Aksi</th>
                 </tr>
             </thead>
@@ -39,6 +40,15 @@
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['unloading_city_name'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['estimated_duration_minute'] }} Menit</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ number_format($transitPoint['extra_cost'], 2) }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
+                            @if ($transitPoint['is_active'] == 1)
+                                <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"> Aktif</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-redow-100 text-redow-800"> Non-Aktif</span>
+                            @endif
+                        </td>
+
                         <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">
                             <a href="{{ route('transit-points.edit', $transitPoint['id']) }}"  class="bg-yellow-500 text-white px-4 py-1.5 rounded-lg hover:bg-yellow-600 transition duration-200 ease-in-out transform hover:-translate-y-0.5">Edit</a>
                             <form action="{{ route('transit-points.destroy', $transitPoint['id']) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transit point ini?')">

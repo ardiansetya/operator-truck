@@ -326,7 +326,24 @@
                             <div class="text-center border-b border-gray-200 pb-4 mb-4">
                                 <p class="text-sm text-gray-600">Invoice #</p>
                                 <p class="text-lg font-bold text-gray-900">
-                                    {{ str_pad($delivery['id'] ?? '0', 6, '0', STR_PAD_LEFT) }}</p>
+                                    {{ str_pad($delivery['id'] ?? '0', 6, '0', STR_PAD_LEFT) }}
+                                </p>
+                            </div>
+
+                            <!-- ✅ Info Driver dan Truk -->
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 space-y-2">
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">Driver:</span>
+                                    {{ $delivery['worker_name'] ?? 'Tidak Diketahui' }}
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">Model Truk:</span>
+                                    {{ $delivery['truck_model'] ?? 'Tidak Diketahui' }}
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    <span class="font-semibold text-gray-800">Plat Nomor:</span>
+                                    {{ $delivery['truck_license_plate'] ?? 'Tidak Diketahui' }}
+                                </p>
                             </div>
 
                             <!-- Pricing Details -->
@@ -334,8 +351,7 @@
                                 @php
                                     $base_price = $delivery['base_price'] ?? 0;
 
-                                    // Tambahkan biaya extra dari transit points
-                                    // ✅ Tambahkan biaya extra hanya untuk transit yang diterima
+                                    // Tambahkan biaya extra dari transit points yang diterima
                                     $extra_cost = 0;
                                     if (!empty($delivery['transits'])) {
                                         foreach ($delivery['transits'] as $transit) {
@@ -390,6 +406,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         <!-- Action Buttons -->

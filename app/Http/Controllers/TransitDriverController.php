@@ -123,6 +123,13 @@ class TransitDriverController extends BaseApiController
                     }
                 }
 
+
+                $status = 'Menunggu'; // default
+
+                if (!is_null($transit['is_accepted'])) {
+                    $status = $transit['is_accepted'] ? 'Diterima' : 'Ditolak';
+                }
+
                 $drivers[] = [
                     'id' => $transit['id'],
                     'delivery_id' => $transit['delivery_id'],
@@ -131,7 +138,7 @@ class TransitDriverController extends BaseApiController
                     'route_start' => $routeStart,
                     'route_end' => $routeEnd,
                     'tarif' => $tarif,
-                    'status' => $transit['is_accepted'] ? 'Diterima' : 'Ditolak',
+                    'status' => $status,
                     'operator' => $operatorName,
                 ];
             }
