@@ -470,6 +470,13 @@ class DeliveryController extends BaseApiController
             ];
 
 
+            // $status = 'Menunggu'; // default
+
+            // if (!is_null($delivery['is_accepted'])) {
+            //     $status = $delivery['is_accepted'] ? 'Diterima' : 'Ditolak';
+            // }
+
+
             // Cache data pendukung
             $cities = Cache::remember('cities', 3600, function () {
                 $response = $this->makeRequest('GET', $this->baseUrl . '/api/cities');
@@ -517,6 +524,7 @@ class DeliveryController extends BaseApiController
                 $route = [];
             }
 
+
             $delivery['start_city_name'] = $route['start_city_name'] ?? $cities->get($route['start_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
             $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
             $delivery['base_price'] = $route['base_price'] ?? 0;
@@ -527,8 +535,10 @@ class DeliveryController extends BaseApiController
             $delivery['worker_name'] = $workers->get($delivery['worker_id'] ?? null, ['username' => 'Unknown'])['username'] ?? 'Unknown';
             $delivery['add_by_operator_name'] = isset($delivery['add_by_operator_id']) ? $this->getOperatorName($delivery['add_by_operator_id']) : 'N/A';
 
+            // $delivery['status'] = $status;
+
             // Log data akhir yang akan dikirim ke view
-            Log::info('Final delivery data sent to view', [
+            Log::debug('Final delivery data sent to view', [
                 'delivery_id' => $delivery['id'] ?? 'unknown',
                 'delivery' => $delivery,
             ]);

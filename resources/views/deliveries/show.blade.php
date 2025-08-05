@@ -223,10 +223,18 @@
                                                         @endif
                                                     </div>
                                                 </div>
-                                                <span
-                                                    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $transit['is_accepted'] ?? false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                    {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Ditolak' }}
-                                                </span>
+                                                @if (is_null($transit['reason']))
+                                                    <span
+                                                        class="inline-flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                                        Menunggu
+                                                    </span>
+                                                @else
+                                                    <span
+                                                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $transit['is_accepted'] ?? false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                        {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Ditolak' }}
+                                                    </span>
+                                                @endif
+
                                             </div>
 
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
