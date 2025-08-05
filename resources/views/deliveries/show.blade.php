@@ -138,7 +138,8 @@
                             </div>
                         </div>
 
-                        <!-- Timeline Information -->
+                        {{-- Timeline Information  --}}
+                        {{-- Timeline Information - Perbaikan Format Waktu --}}
                         <div class="bg-gray-50 rounded-xl p-4">
                             <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
@@ -152,25 +153,55 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600 mb-1">Waktu Mulai</label>
                                     <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">
-                                        {{ $delivery['started_at'] ? date('d/m/Y H:i', $delivery['started_at'] / 1000) : 'Belum dimulai' }}
+                                        @if ($delivery['started_at'])
+                                            @php
+                                                // Handle epoch time - bisa dalam detik atau milidetik
+                                                $timestamp = $delivery['started_at'];
+                                                // Jika timestamp lebih dari 10 digit, berarti dalam milidetik
+                                                if ($timestamp > 9999999999) {
+                                                    $timestamp = $timestamp / 1000;
+                                                }
+                                                // Set timezone ke Asia/Jakarta (WIB)
+                                                $date = new DateTime();
+                                                $date->setTimestamp($timestamp);
+                                                $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                            @endphp
+                                            {{ $date->format('d/m/Y H:i:s') }}
+                                        @else
+                                            Belum dimulai
+                                        @endif
                                     </p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600 mb-1">Waktu Selesai</label>
                                     <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">
-                                        {{ $delivery['finished_at'] ? date('d/m/Y H:i', $delivery['finished_at'] / 1000) : 'Belum selesai' }}
+                                        @if ($delivery['finished_at'])
+                                            @php
+                                                $timestamp = $delivery['finished_at'];
+                                                if ($timestamp > 9999999999) {
+                                                    $timestamp = $timestamp / 1000;
+                                                }
+                                                $date = new DateTime();
+                                                $date->setTimestamp($timestamp);
+                                                $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                            @endphp
+                                            {{ $date->format('d/m/Y H:i:s') }}
+                                        @else
+                                            Belum selesai
+                                        @endif
                                     </p>
                                 </div>
                             </div>
                             <div class="mt-4">
                                 <label class="block text-sm font-medium text-gray-600 mb-1">Ditambahkan Oleh</label>
                                 <p class="text-gray-900 font-semibold bg-white px-3 py-2 rounded-lg border">
-                                    {{ $delivery['add_by_operator_name'] ?? 'Tidak Diketahui' }}</p>
+                                    {{ $delivery['add_by_operator_name'] ?? 'Tidak Diketahui' }}
+                                </p>
                             </div>
                         </div>
 
+                        {{-- Transit Points - Perbaikan Format Waktu --}}
                         @if (!empty($delivery['transits']))
-                            <!-- Transit Points -->
                             <div class="bg-gray-50 rounded-xl p-4">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
                                     <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -234,7 +265,6 @@
                                                         {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Ditolak' }}
                                                     </span>
                                                 @endif
-
                                             </div>
 
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -242,7 +272,17 @@
                                                     <div>
                                                         <span class="font-medium text-gray-600">Waktu Tiba:</span>
                                                         <p class="text-gray-800">
-                                                            {{ date('d/m/Y H:i', $transit['arrived_at'] / 1000) }}</p>
+                                                            @php
+                                                                $timestamp = $transit['arrived_at'];
+                                                                if ($timestamp > 9999999999) {
+                                                                    $timestamp = $timestamp / 1000;
+                                                                }
+                                                                $date = new DateTime();
+                                                                $date->setTimestamp($timestamp);
+                                                                $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                                            @endphp
+                                                            {{ $date->format('d/m/Y H:i:s') }}
+                                                        </p>
                                                     </div>
                                                 @endif
 
@@ -250,7 +290,17 @@
                                                     <div>
                                                         <span class="font-medium text-gray-600">Waktu Aksi:</span>
                                                         <p class="text-gray-800">
-                                                            {{ date('d/m/Y H:i', $transit['actioned_at'] / 1000) }}</p>
+                                                            @php
+                                                                $timestamp = $transit['actioned_at'];
+                                                                if ($timestamp > 9999999999) {
+                                                                    $timestamp = $timestamp / 1000;
+                                                                }
+                                                                $date = new DateTime();
+                                                                $date->setTimestamp($timestamp);
+                                                                $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                                            @endphp
+                                                            {{ $date->format('d/m/Y H:i:s') }}
+                                                        </p>
                                                     </div>
                                                 @endif
                                             </div>
@@ -274,8 +324,8 @@
                             </div>
                         @endif
 
+                        {{-- Alerts - Perbaikan Format Waktu --}}
                         @if (!empty($delivery['alerts']))
-                            <!-- Alerts -->
                             <div class="bg-red-50 rounded-xl p-4 border border-red-200">
                                 <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center">
                                     <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
@@ -297,12 +347,24 @@
                                                         </span>
                                                         @if ($alert['created_at'])
                                                             <span class="text-xs text-red-600">
-                                                                {{ date('d/m/Y H:i', $alert['created_at'] / 1000) }}
+                                                                @php
+                                                                    $timestamp = $alert['created_at'];
+                                                                    if ($timestamp > 9999999999) {
+                                                                        $timestamp = $timestamp / 1000;
+                                                                    }
+                                                                    $date = new DateTime();
+                                                                    $date->setTimestamp($timestamp);
+                                                                    $date->setTimezone(
+                                                                        new DateTimeZone('Asia/Jakarta'),
+                                                                    );
+                                                                @endphp
+                                                                {{ $date->format('d/m/Y H:i:s') }}
                                                             </span>
                                                         @endif
                                                     </div>
                                                     <p class="text-sm text-red-700">
-                                                        {{ $alert['message'] ?? 'Tidak ada pesan' }}</p>
+                                                        {{ $alert['message'] ?? 'Tidak ada pesan' }}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>

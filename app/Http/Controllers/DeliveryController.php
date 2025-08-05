@@ -14,6 +14,23 @@ class DeliveryController extends BaseApiController
         parent::__construct();
         $this->endpoint = $this->baseUrl ? $this->baseUrl . '/api/delivery' : '';
     }
+      private function clearDeliveryRelatedCaches()
+    {
+        $cacheKeys = [
+            'deliveries_active',
+            'routes_for_deliveries',
+            'trucks_for_deliveries', 
+            'workers_for_deliveries',
+        ];
+        
+        foreach ($cacheKeys as $key) {
+            Cache::forget($key);
+        }
+        
+        Log::info('Delivery related caches cleared', ['keys' => $cacheKeys]);
+    }
+
+
 
     private function getOperatorName($operator_id)
     {
@@ -38,7 +55,7 @@ class DeliveryController extends BaseApiController
             }
             $cacheKey = 'user_profile_' . hash('sha256', $token);
 
-            $profile = Cache::remember($cacheKey, 3600, function () use ($token) {
+            $profile = Cache::remember($cacheKey, 60, function () use ($token) {
                 $response = $this->makeRequest('GET', $this->baseUrl . '/api/users/profile');
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
                     throw new \Exception('Redirect received during profile fetch');
@@ -70,8 +87,8 @@ class DeliveryController extends BaseApiController
                 return view('deliveries.index', ['deliveries' => [], 'error' => 'Konfigurasi server tidak lengkap']);
             }
 
-            // Cache deliveries with shorter cache time for debugging
-            $deliveries = Cache::remember('deliveries_active', 60, function () {
+            // Cache deliveries
+            $deliveries = Cache::remember('deliveries_active', 300, function () { // Naikan ke 5 menit
                 $response = $this->makeRequest('GET', "{$this->endpoint}/active");
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
                     throw new \Exception('Redirect received during deliveries fetch');
@@ -81,8 +98,6 @@ class DeliveryController extends BaseApiController
                 }
 
                 $data = $response->json('data') ?? [];
-
-                // Log raw API response for debugging
                 Log::info('Raw deliveries API response', [
                     'data' => $data,
                     'response_status' => $response->status(),
@@ -91,22 +106,13 @@ class DeliveryController extends BaseApiController
                 return $data;
             });
 
-            // Log the deliveries data structure
-            Log::info('Deliveries data structure analysis', [
-                'count' => count($deliveries),
-                'sample_delivery' => !empty($deliveries) ? $deliveries[0] : null,
-                'all_worker_ids' => collect($deliveries)->pluck('worker_id')->toArray(),
-                'all_truck_ids' => collect($deliveries)->pluck('truck_id')->toArray(),
-                'all_route_ids' => collect($deliveries)->pluck('route_id')->toArray(),
-            ]);
-
             // Extract unique IDs from deliveries
             $route_ids = collect($deliveries)->pluck('route_id')->filter()->unique()->values()->toArray();
             $truck_ids = collect($deliveries)->pluck('truck_id')->filter()->unique()->values()->toArray();
             $worker_ids = collect($deliveries)->pluck('worker_id')->filter()->unique()->values()->toArray();
 
             // Cache supporting data based on delivery IDs
-            $routes = Cache::remember('routes_for_deliveries', 60, function () use ($route_ids) {
+            $routes = Cache::remember('routes_for_deliveries', 300, function () use ($route_ids) {
                 if (empty($route_ids)) {
                     return collect([]);
                 }
@@ -121,7 +127,6 @@ class DeliveryController extends BaseApiController
                         $route = $response->json('data') ?? [];
                         if (!empty($route)) {
                             $routes[] = $route;
-                            Log::info('Route fetched successfully', ['route_id' => $id, 'route_data' => $route]);
                         }
                     } else {
                         Log::warning('Failed to fetch route', ['route_id' => $id, 'status' => $response->status()]);
@@ -130,7 +135,7 @@ class DeliveryController extends BaseApiController
                 return collect($routes)->keyBy('id');
             });
 
-            $trucks = Cache::remember('trucks_for_deliveries', 60, function () use ($truck_ids) {
+            $trucks = Cache::remember('trucks_for_deliveries', 300, function () use ($truck_ids) {
                 if (empty($truck_ids)) {
                     return collect([]);
                 }
@@ -145,7 +150,6 @@ class DeliveryController extends BaseApiController
                         $truck = $response->json('data') ?? [];
                         if (!empty($truck)) {
                             $trucks[] = $truck;
-                            Log::info('Truck fetched successfully', ['truck_id' => $id, 'truck_data' => $truck]);
                         }
                     } else {
                         Log::warning('Failed to fetch truck', ['truck_id' => $id, 'status' => $response->status()]);
@@ -154,7 +158,7 @@ class DeliveryController extends BaseApiController
                 return collect($trucks)->keyBy('id');
             });
 
-            $workers = Cache::remember('workers_for_deliveries', 60, function () use ($worker_ids) {
+            $workers = Cache::remember('workers_for_deliveries', 300, function () use ($worker_ids) {
                 if (empty($worker_ids)) {
                     return collect([]);
                 }
@@ -169,7 +173,6 @@ class DeliveryController extends BaseApiController
                         $worker = $response->json('data') ?? [];
                         if (!empty($worker)) {
                             $workers[] = $worker;
-                            Log::info('Worker fetched successfully', ['worker_id' => $id, 'worker_data' => $worker]);
                         }
                     } else {
                         Log::warning('Failed to fetch worker', ['worker_id' => $id, 'status' => $response->status()]);
@@ -197,18 +200,6 @@ class DeliveryController extends BaseApiController
                 $truck = $trucks->get($delivery['truck_id'] ?? '', []) ?: [];
                 $worker = $workers->get($delivery['worker_id'] ?? '', []) ?: [];
 
-                // Log the matching process for debugging
-                Log::info('Enriching delivery data', [
-                    'delivery_id' => $delivery['id'] ?? 'unknown',
-                    'delivery_route_id' => $delivery['route_id'] ?? 'missing',
-                    'delivery_truck_id' => $delivery['truck_id'] ?? 'missing',
-                    'delivery_worker_id' => $delivery['worker_id'] ?? 'missing',
-                    'found_route' => !empty($route),
-                    'found_truck' => !empty($truck),
-                    'found_worker' => !empty($worker),
-                ]);
-
-                // Use start_city_name and end_city_name from route, fallback to cities
                 $delivery['start_city_name'] = $route['start_city_name'] ?? $cities->get($route['start_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
                 $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
                 $delivery['base_price'] = $route['base_price'] ?? 0;
@@ -219,11 +210,6 @@ class DeliveryController extends BaseApiController
                 $delivery['worker_name'] = $worker['username'] ?? 'Unknown';
                 $delivery['started_at'] = $delivery['started_at'] ?? null;
             }
-
-            Log::info('Deliveries processed successfully', [
-                'deliveries_count' => count($deliveries),
-                'enriched_deliveries' => $deliveries,
-            ]);
 
             return view('deliveries.index', ['deliveries' => $deliveries]);
         } catch (\Throwable $e) {
@@ -257,28 +243,17 @@ class DeliveryController extends BaseApiController
             }
             $drivers = $driversResponse->successful() ? $driversResponse->json('data') ?? [] : [];
 
-            Log::info('Fetched data for delivery creation', [
-                'trucks' => $trucks,
-                'routes' => $routes,
-                'drivers' => $drivers,
-            ]);
-
             if (!$trucksResponse->successful() || !$routesResponse->successful() || !$driversResponse->successful()) {
                 $error = [];
                 if (!$trucksResponse->successful()) $error[] = 'Gagal memuat data truk';
                 if (!$routesResponse->successful()) $error[] = 'Gagal memuat data rute';
                 if (!$driversResponse->successful()) $error[] = 'Gagal memuat data pengemudi';
-                Log::error('API request failed for create', [
-                    'trucks_status' => $trucksResponse->status(),
-                    'routes_status' => $routesResponse->status(),
-                    'drivers_status' => $driversResponse->status(),
-                ]);
                 return view('deliveries.create', compact('trucks', 'routes', 'drivers') + ['error' => implode(', ', $error)]);
             }
 
             return view('deliveries.create', compact('trucks', 'routes', 'drivers'));
         } catch (\Exception $e) {
-            Log::error('Error fetching data for delivery creation: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Error fetching data for delivery creation: ' . $e->getMessage());
             return view('deliveries.create', ['trucks' => [], 'routes' => [], 'drivers' => [], 'error' => $e->getMessage()]);
         }
     }
@@ -298,11 +273,6 @@ class DeliveryController extends BaseApiController
                 'longitude' => 'required|numeric|between:-180,180',
             ]);
 
-            $operator_id = $this->getAuthenticatedUserId();
-            if (!$operator_id) {
-                return back()->withErrors(['message' => 'Gagal mengambil ID pengguna yang sedang login']);
-            }
-
             $payload = [
                 'truck_id' => $validated['truck_id'],
                 'route_id' => $validated['route_id'],
@@ -311,13 +281,6 @@ class DeliveryController extends BaseApiController
                 'longitude' => (float) $validated['longitude'],
             ];
 
-
-
-            Log::info('Sending payload to POST /api/delivery', [
-                'payload' => $payload,
-                'operator_id' => $operator_id,
-            ]);
-
             $response = $this->makeRequest('POST', $this->endpoint, $payload);
             if ($response instanceof \Illuminate\Http\RedirectResponse) {
                 return $response;
@@ -325,25 +288,18 @@ class DeliveryController extends BaseApiController
 
             if (!$response->successful()) {
                 $errorMessage = $response->json('errors') ?? $response->json('message') ?? 'Gagal membuat pengiriman';
-                Log::error('Failed to create delivery', [
-                    'status' => $response->status(),
-                    'response' => $response->json(),
-                    'payload' => $payload,
-                ]);
                 if ($response->status() === 400 && str_contains($errorMessage, 'Worker already has an active delivery')) {
                     return back()->withErrors(['worker_id' => 'Pengemudi sudah memiliki pengiriman aktif']);
                 }
                 return back()->withErrors(['message' => $errorMessage]);
             }
 
-            Cache::forget('deliveries_active');
+            // ✅ Clear cache setelah berhasil create
+            $this->clearDeliveryRelatedCaches();
 
             return redirect()->route('deliveries.index')->with('success', 'Pengiriman berhasil dibuat');
         } catch (\Exception $e) {
-            Log::error('Error creating delivery: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'payload' => $payload ?? [],
-            ]);
+            Log::error('Error creating delivery: ' . $e->getMessage());
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
@@ -351,10 +307,6 @@ class DeliveryController extends BaseApiController
     public function show(string $id)
     {
         try {
-            // if (empty($this->baseUrl)) {
-            //     return redirect()->route('deliveries.index')->withErrors(['message' => 'Konfigurasi server tidak lengkap']);
-            // }
-
             // Ambil data pengiriman dari API
             $deliveryResponse = $this->makeRequest('GET', "{$this->endpoint}/detail/{$id}");
             if ($deliveryResponse instanceof \Illuminate\Http\RedirectResponse) {
@@ -364,23 +316,74 @@ class DeliveryController extends BaseApiController
                 $errorMessage = $deliveryResponse->status() === 403
                     ? 'Anda tidak memiliki izin untuk melihat pengiriman ini'
                     : 'Pengiriman tidak ditemukan';
-                Log::error('API request failed for delivery', [
-                    'status' => $deliveryResponse->status(),
-                    'id' => $id,
-                    'response' => $deliveryResponse->json(),
-                ]);
                 return redirect()->route('deliveries.index')->withErrors(['message' => $errorMessage]);
             }
 
             $apiData = $deliveryResponse->json('data') ?? [];
 
-            // Log raw API data untuk debugging
-            Log::info('Raw delivery API response', [
-                'delivery_id' => $id,
-                'data' => $apiData,
-            ]);
+            // ✅ Cache dengan key yang KONSISTEN
+            $cities = Cache::remember('cities', 3600, function () {
+                $response = $this->makeRequest('GET', $this->baseUrl . '/api/cities');
+                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
+                    return collect([]);
+                }
+                return collect($response->json('data') ?? [])->keyBy('id');
+            });
 
-            // Pemetaan camelCase ke snake_case
+            $trucks = Cache::remember('trucks_for_deliveries', 300, function () {
+                $response = $this->makeRequest('GET', $this->baseUrl . '/api/trucks');
+                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
+                    return collect([]);
+                }
+                return collect($response->json('data') ?? [])->keyBy('id');
+            });
+
+            $routes = Cache::remember('routes_for_deliveries', 300, function () {
+                $response = $this->makeRequest('GET', $this->baseUrl . '/api/routes');
+                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
+                    return collect([]);
+                }
+                return collect($response->json('data') ?? [])->keyBy('id');
+            });
+
+            $workers = Cache::remember('workers_for_deliveries', 300, function () {
+                $response = $this->makeRequest('GET', $this->baseUrl . '/api/users/drivers');
+                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
+                    return collect([]);
+                }
+                return collect($response->json('data') ?? [])->keyBy('id');
+            });
+
+            // ✅ Optimasi: Collect city IDs untuk batch fetch
+            $cityIds = [];
+            foreach ($apiData['transits'] ?? [] as $transit) {
+                $transitPoint = $transit['transit_point'] ?? [];
+                if (!empty($transitPoint['loading_city_id'])) {
+                    $cityIds[] = $transitPoint['loading_city_id'];
+                }
+                if (!empty($transitPoint['unloading_city_id'])) {
+                    $cityIds[] = $transitPoint['unloading_city_id'];
+                }
+            }
+            $cityIds = array_unique($cityIds);
+
+            // Fetch missing cities
+            $transitCities = $cities;
+            foreach ($cityIds as $cityId) {
+                if (!$cities->has($cityId)) {
+                    try {
+                        $cityResp = $this->makeRequest('GET', $this->baseUrl . '/api/cities/' . $cityId);
+                        if ($cityResp->successful()) {
+                            $cityData = $cityResp->json('data') ?? [];
+                            $transitCities->put($cityId, $cityData);
+                        }
+                    } catch (\Exception $e) {
+                        Log::warning('Gagal mengambil data city', ['id' => $cityId, 'error' => $e->getMessage()]);
+                    }
+                }
+            }
+
+            // ✅ Pemetaan data dengan optimasi
             $delivery = [
                 'id' => $apiData['id'] ?? null,
                 'worker_id' => $apiData['worker_id'] ?? null,
@@ -397,57 +400,33 @@ class DeliveryController extends BaseApiController
                         'created_at' => $alert['created_at'] ?? null,
                     ];
                 }, $apiData['alerts'] ?? []),
-                'transits' => array_map(function ($transit) {
+                'transits' => array_map(function ($transit) use ($transitCities) {
                     $transit_point = $transit['transit_point'] ?? [];
 
-                    // Default data kota
-                    $loadingCity = ['id' => null, 'name' => 'Unknown'];
-                    $unloadingCity = ['id' => null, 'name' => 'Unknown'];
-
-                    // Ambil nama kota Loading
-                    if (!empty($transit_point['loading_city_id'])) {
-                        try {
-                            $cityResp = $this->makeRequest('GET', $this->baseUrl . '/api/cities/' . $transit_point['loading_city_id']);
-                            if ($cityResp->successful()) {
-                                $loadingCity = $cityResp->json('data') ?? $loadingCity;
-                            }
-                        } catch (\Exception $e) {
-                            Log::warning('Gagal mengambil data loading city', [
-                                'id' => $transit_point['loading_city_id'],
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
-
-                    // Ambil nama kota Unloading
-                    if (!empty($transit_point['unloading_city_id'])) {
-                        try {
-                            $cityResp = $this->makeRequest('GET', $this->baseUrl . '/api/cities/' . $transit_point['unloading_city_id']);
-                            if ($cityResp->successful()) {
-                                $unloadingCity = $cityResp->json('data') ?? $unloadingCity;
-                            }
-                        } catch (\Exception $e) {
-                            Log::warning('Gagal mengambil data unloading city', [
-                                'id' => $transit_point['unloading_city_id'],
-                                'error' => $e->getMessage(),
-                            ]);
-                        }
-                    }
+                    // ✅ Gunakan collection yang sudah di-prepare
+                    $loadingCity = $transitCities->get($transit_point['loading_city_id'] ?? null, [
+                        'id' => null,
+                        'name' => 'Unknown'
+                    ]);
+                    $unloadingCity = $transitCities->get($transit_point['unloading_city_id'] ?? null, [
+                        'id' => null,
+                        'name' => 'Unknown'
+                    ]);
 
                     return [
                         'id' => $transit['id'] ?? null,
                         'transit_point' => [
                             'id' => $transit_point['id'] ?? null,
                             'loading_city' => [
-                                'id' => $loadingCity['id'],
-                                'name' => $loadingCity['name'],
+                                'id' => $loadingCity['id'] ?? null,
+                                'name' => $loadingCity['name'] ?? 'Unknown',
                                 'latitude' => $loadingCity['latitude'] ?? null,
                                 'longitude' => $loadingCity['longitude'] ?? null,
                                 'country' => $loadingCity['country'] ?? null,
                             ],
                             'unloading_city' => [
-                                'id' => $unloadingCity['id'],
-                                'name' => $unloadingCity['name'],
+                                'id' => $unloadingCity['id'] ?? null,
+                                'name' => $unloadingCity['name'] ?? 'Unknown',
                                 'latitude' => $unloadingCity['latitude'] ?? null,
                                 'longitude' => $unloadingCity['longitude'] ?? null,
                                 'country' => $unloadingCity['country'] ?? null,
@@ -466,64 +445,13 @@ class DeliveryController extends BaseApiController
                             : 'N/A',
                     ];
                 }, $apiData['transits'] ?? []),
-
             ];
-
-
-            // $status = 'Menunggu'; // default
-
-            // if (!is_null($delivery['is_accepted'])) {
-            //     $status = $delivery['is_accepted'] ? 'Diterima' : 'Ditolak';
-            // }
-
-
-            // Cache data pendukung
-            $cities = Cache::remember('cities', 3600, function () {
-                $response = $this->makeRequest('GET', $this->baseUrl . '/api/cities');
-                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
-                    Log::error('API request failed for cities', ['status' => $response->status()]);
-                    return collect([]);
-                }
-                return collect($response->json('data') ?? [])->keyBy('id');
-            });
-
-            $trucks = Cache::remember('trucks', 3600, function () {
-                $response = $this->makeRequest('GET', $this->baseUrl . '/api/trucks');
-                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
-                    Log::error('API request failed for trucks', ['status' => $response->status()]);
-                    return collect([]);
-                }
-                return collect($response->json('data') ?? [])->keyBy('id');
-            });
-
-            $routes = Cache::remember('routes', 3600, function () {
-                $response = $this->makeRequest('GET', $this->baseUrl . '/api/routes');
-                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
-                    Log::error('API request failed for routes', ['status' => $response->status()]);
-                    return collect([]);
-                }
-                return collect($response->json('data') ?? [])->keyBy('id');
-            });
-
-            $workers = Cache::remember('workers', 3600, function () {
-                $response = $this->makeRequest('GET', $this->baseUrl . '/api/users/drivers');
-                if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
-                    Log::error('API request failed for workers', ['status' => $response->status()]);
-                    return collect([]);
-                }
-                return collect($response->json('data') ?? [])->keyBy('id');
-            });
 
             // Enrich delivery dengan data tambahan
             $route = $routes->get($delivery['route_id'] ?? '', []) ?: [];
             if (!is_array($route)) {
-                Log::warning('Invalid route data for delivery', [
-                    'delivery_id' => $delivery['id'] ?? 'unknown',
-                    'route_id' => $delivery['route_id'] ?? 'missing',
-                ]);
                 $route = [];
             }
-
 
             $delivery['start_city_name'] = $route['start_city_name'] ?? $cities->get($route['start_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
             $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
@@ -535,23 +463,13 @@ class DeliveryController extends BaseApiController
             $delivery['worker_name'] = $workers->get($delivery['worker_id'] ?? null, ['username' => 'Unknown'])['username'] ?? 'Unknown';
             $delivery['add_by_operator_name'] = isset($delivery['add_by_operator_id']) ? $this->getOperatorName($delivery['add_by_operator_id']) : 'N/A';
 
-            // $delivery['status'] = $status;
-
-            // Log data akhir yang akan dikirim ke view
-            Log::debug('Final delivery data sent to view', [
-                'delivery_id' => $delivery['id'] ?? 'unknown',
-                'delivery' => $delivery,
-            ]);
-
             return view('deliveries.show', compact('delivery'));
         } catch (\Exception $e) {
-            Log::error('Error fetching delivery: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'id' => $id,
-            ]);
+            Log::error('Error fetching delivery: ' . $e->getMessage(), ['id' => $id]);
             return redirect()->route('deliveries.index')->with(['error' => 'Gagal mengambil detail pengiriman: ' . $e->getMessage()]);
         }
     }
+
 
     public function finish(string $id)
     {
@@ -709,7 +627,7 @@ class DeliveryController extends BaseApiController
             });
 
             // Cache cities for fallback
-            $cities = Cache::remember('cities', 3600, function () {
+            $cities = Cache::remember('cities', 60, function () {
                 $response = $this->makeRequest('GET', $this->baseUrl . '/api/cities');
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
                     throw new \Exception('Redirect received during cities fetch');
