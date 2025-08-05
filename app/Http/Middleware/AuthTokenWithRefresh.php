@@ -94,14 +94,15 @@ class AuthTokenWithRefresh
 
             $response = Http::withHeaders(['Accept' => 'application/json'])
                 ->timeout(10)
-                ->post("{$this->javaBackend}/api/auth/refresh-token", [
+                ->post("{$this->javaBackend}/auth/refresh-token", [
                     'refresh_token' => $refresh_token
                 ]);
 
             if ($response->successful()) {
-                $data = $response->json('data') ?? $response->json();
+                $data = $response->json('data');
+                Log::info('Refresh token response', [$data['access_token']]);
 
-                if (!isset($data['accessToken']) || !isset($data['refresh_token'])) {
+                if (!isset($data['access_token'])) {
                     Log::error('Invalid refresh token response format', [
                         'body' => $response->body()
                     ]);
@@ -110,8 +111,8 @@ class AuthTokenWithRefresh
 
                 // Update session with new tokens
                 session([
-                    'access_token' => $data['accessToken'],
-                    'refresh_token' => $data['refresh_token'],
+                    'access_token' => $data['access_token'],
+                    // 'refresh_token' => $data['refresh_token'],
                     'token_type' => $data['tokenType'] ?? 'Bearer',
                 ]);
 
