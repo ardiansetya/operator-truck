@@ -208,7 +208,7 @@ class DeliveryController extends BaseApiController
                 $delivery['estimated_duration_hours'] = $route['estimated_duration_hours'] ?? 0;
                 $delivery['add_by_operator_name'] = isset($delivery['add_by_operator_id']) ? $this->getOperatorName($delivery['add_by_operator_id']) : 'N/A';
                 $delivery['worker_name'] = $worker['username'] ?? 'Unknown';
-                $delivery['started_at'] = $delivery['started_at'] ?? null;
+                $delivery['finished_at'] = $delivery['finished_at'] ?? null;
             }
 
             return view('deliveries.index', ['deliveries' => $deliveries]);
@@ -515,23 +515,21 @@ class DeliveryController extends BaseApiController
     {
         try {
             if (empty($this->baseUrl)) {
-                return view('deliveries.index', ['deliveries' => [], 'error' => 'Konfigurasi server tidak lengkap']);
+                return view('deliveries.history', ['deliveries' => [], 'error' => 'Konfigurasi server tidak lengkap']);
             }
 
-            // Cache deliveries with shorter cache time for debugging
-            $deliveries = Cache::remember('deliveries_active', 60, function () {
+            // ✅ Cache dengan key yang berbeda untuk history
+            $deliveries = Cache::remember('deliveries_history', 300, function () {
                 $response = $this->makeRequest('GET', "{$this->endpoint}/history");
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
-                    throw new \Exception('Redirect received during deliveries fetch');
+                    throw new \Exception('Redirect received during deliveries history fetch');
                 }
                 if (!$response->successful()) {
                     throw new \Exception('Failed to fetch deliveries: ' . $response->json('message', 'Kesalahan server'));
                 }
 
                 $data = $response->json('data') ?? [];
-
-                // Log raw API response for debugging
-                Log::info('Raw deliveries API response', [
+                Log::info('Raw deliveries history API response', [
                     'data' => $data,
                     'response_status' => $response->status(),
                 ]);
@@ -539,22 +537,21 @@ class DeliveryController extends BaseApiController
                 return $data;
             });
 
-            // Log the deliveries data structure
-            Log::info('Deliveries history data structure analysis', [
-                'count' => count($deliveries),
-                'sample_delivery' => !empty($deliveries) ? $deliveries[0] : null,
-                'all_worker_ids' => collect($deliveries)->pluck('worker_id')->toArray(),
-                'all_truck_ids' => collect($deliveries)->pluck('truck_id')->toArray(),
-                'all_route_ids' => collect($deliveries)->pluck('route_id')->toArray(),
-            ]);
+            // ✅ Jika tidak ada data history, kembalikan response 200 dengan empty array
+            if (empty($deliveries)) {
+                return view('deliveries.history', [
+                    'deliveries' => [],
+                    'message' => 'Belum ada riwayat pengiriman'
+                ]);
+            }
 
             // Extract unique IDs from deliveries
             $route_ids = collect($deliveries)->pluck('route_id')->filter()->unique()->values()->toArray();
             $truck_ids = collect($deliveries)->pluck('truck_id')->filter()->unique()->values()->toArray();
             $worker_ids = collect($deliveries)->pluck('worker_id')->filter()->unique()->values()->toArray();
 
-            // Cache supporting data based on delivery IDs
-            $routes = Cache::remember('routes_for_deliveries', 60, function () use ($route_ids) {
+            // ✅ Cache dengan key khusus untuk history
+            $routes = Cache::remember('routes_for_history', 300, function () use ($route_ids) {
                 if (empty($route_ids)) {
                     return collect([]);
                 }
@@ -569,7 +566,6 @@ class DeliveryController extends BaseApiController
                         $route = $response->json('data') ?? [];
                         if (!empty($route)) {
                             $routes[] = $route;
-                            Log::info('Route fetched successfully', ['route_id' => $id, 'route_data' => $route]);
                         }
                     } else {
                         Log::warning('Failed to fetch route', ['route_id' => $id, 'status' => $response->status()]);
@@ -578,7 +574,7 @@ class DeliveryController extends BaseApiController
                 return collect($routes)->keyBy('id');
             });
 
-            $trucks = Cache::remember('trucks_for_deliveries', 60, function () use ($truck_ids) {
+            $trucks = Cache::remember('trucks_for_history', 300, function () use ($truck_ids) {
                 if (empty($truck_ids)) {
                     return collect([]);
                 }
@@ -593,7 +589,6 @@ class DeliveryController extends BaseApiController
                         $truck = $response->json('data') ?? [];
                         if (!empty($truck)) {
                             $trucks[] = $truck;
-                            Log::info('Truck fetched successfully', ['truck_id' => $id, 'truck_data' => $truck]);
                         }
                     } else {
                         Log::warning('Failed to fetch truck', ['truck_id' => $id, 'status' => $response->status()]);
@@ -602,7 +597,7 @@ class DeliveryController extends BaseApiController
                 return collect($trucks)->keyBy('id');
             });
 
-            $workers = Cache::remember('workers_for_deliveries', 60, function () use ($worker_ids) {
+            $workers = Cache::remember('workers_for_history', 300, function () use ($worker_ids) {
                 if (empty($worker_ids)) {
                     return collect([]);
                 }
@@ -617,7 +612,6 @@ class DeliveryController extends BaseApiController
                         $worker = $response->json('data') ?? [];
                         if (!empty($worker)) {
                             $workers[] = $worker;
-                            Log::info('Worker fetched successfully', ['worker_id' => $id, 'worker_data' => $worker]);
                         }
                     } else {
                         Log::warning('Failed to fetch worker', ['worker_id' => $id, 'status' => $response->status()]);
@@ -626,8 +620,8 @@ class DeliveryController extends BaseApiController
                 return collect($workers)->keyBy('id');
             });
 
-            // Cache cities for fallback
-            $cities = Cache::remember('cities', 60, function () {
+            // ✅ Cache cities dengan TTL yang lebih lama karena jarang berubah
+            $cities = Cache::remember('cities', 3600, function () {
                 $response = $this->makeRequest('GET', $this->baseUrl . '/api/cities');
                 if ($response instanceof \Illuminate\Http\RedirectResponse) {
                     throw new \Exception('Redirect received during cities fetch');
@@ -645,18 +639,6 @@ class DeliveryController extends BaseApiController
                 $truck = $trucks->get($delivery['truck_id'] ?? '', []) ?: [];
                 $worker = $workers->get($delivery['worker_id'] ?? '', []) ?: [];
 
-                // Log the matching process for debugging
-                Log::info('Enriching delivery data', [
-                    'delivery_id' => $delivery['id'] ?? 'unknown',
-                    'delivery_route_id' => $delivery['route_id'] ?? 'missing',
-                    'delivery_truck_id' => $delivery['truck_id'] ?? 'missing',
-                    'delivery_worker_id' => $delivery['worker_id'] ?? 'missing',
-                    'found_route' => !empty($route),
-                    'found_truck' => !empty($truck),
-                    'found_worker' => !empty($worker),
-                ]);
-
-                // Use start_city_name and end_city_name from route, fallback to cities
                 $delivery['start_city_name'] = $route['start_city_name'] ?? $cities->get($route['start_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
                 $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
                 $delivery['base_price'] = $route['base_price'] ?? 0;
@@ -666,17 +648,18 @@ class DeliveryController extends BaseApiController
                 $delivery['add_by_operator_name'] = isset($delivery['add_by_operator_id']) ? $this->getOperatorName($delivery['add_by_operator_id']) : 'N/A';
                 $delivery['worker_name'] = $worker['username'] ?? 'Unknown';
                 $delivery['started_at'] = $delivery['started_at'] ?? null;
+                $delivery['finished_at'] = $delivery['finished_at'] ?? null; // ✅ Tambahkan finished_at untuk history
             }
 
-            Log::info('Deliveries processed successfully', [
+            Log::info('Deliveries history processed successfully', [
                 'deliveries_count' => count($deliveries),
-                'enriched_deliveries' => $deliveries,
             ]);
 
             return view('deliveries.history', ['deliveries' => $deliveries]);
         } catch (\Throwable $e) {
-            Log::error('Error fetching deliveries: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Error fetching deliveries history: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return view('deliveries.history', ['deliveries' => [], 'error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
+
 }

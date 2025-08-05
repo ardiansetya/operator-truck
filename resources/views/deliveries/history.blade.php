@@ -54,8 +54,8 @@
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['estimated_duration_hours'] ?? 0 }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $delivery['add_by_operator_name'] ?? 'N/A' }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $delivery['started_at'] ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                {{ $delivery['started_at'] ? 'Aktif' : 'Selesai' }}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $delivery['finished_at'] ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                {{ $delivery['finished_at'] ? 'Selesai' : 'Aktif' }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm border-b border-gray-100  flex flex-col space-y-2 items-center justify-center">
