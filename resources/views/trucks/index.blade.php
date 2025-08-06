@@ -52,7 +52,7 @@
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $truck['capacity_kg'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $truck['is_available'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $truck['is_available'] ? 'Tersedia' : 'Tidak Tersedia' }}
+                                {{ $truck['is_available'] ? 'Tersedia' : 'Maintenance' }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm border-b border-gray-100 space-x-3">
