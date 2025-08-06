@@ -93,7 +93,7 @@
 
                     <!-- Cargo Type -->
                     <div>
-                        <label for="cargo_type" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="type_cargo" class="block text-sm font-semibold text-gray-700 mb-2">
                             <span class="flex items-center">
                                 <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -101,10 +101,10 @@
                                 Tipe Muatan
                             </span>
                         </label>
-                        <input type="text" name="cargo_type" id="cargo_type" value="{{ old('cargo_type') }}" 
+                        <input type="text" name="type_cargo" id="type_cargo" value="{{ old('type_cargo') }}" 
                                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-gray-50 focus:bg-white" 
                                placeholder="Contoh: Pakan, Besi, Pasir" required>
-                        @error('cargo_type')
+                        @error('type_cargo')
                             <span class="text-red-500 text-sm mt-1 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />

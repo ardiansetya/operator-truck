@@ -27,6 +27,7 @@
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Pemuatan</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Kota Pembongkaran</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Estimasi Waktu</th>
+                    <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Tipe Muatan</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Biaya Ekstra</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Status</th>
                     <th class="text-left px-6 py-4 text-sm font-medium text-gray-600">Aksi</th>
@@ -39,6 +40,7 @@
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['loading_city_name'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['unloading_city_name'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['estimated_duration_minute'] }} Menit</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['type_cargo'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ number_format($transitPoint['extra_cost'], 2) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
                             @if ($transitPoint['is_active'] == 1)

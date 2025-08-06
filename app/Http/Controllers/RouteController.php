@@ -33,6 +33,7 @@ class RouteController extends BaseApiController
                 return view('routes.index', ['routes' => [], 'error' => $errorMessage]);
             }
             $routes = $routesResponse->json('data') ?? [];
+            Log::info('Fetched routes', ['routes' => $routes]);
 
 
 
@@ -92,6 +93,7 @@ class RouteController extends BaseApiController
                 'end_city_id' => 'required|integer',
                 'details' => 'nullable|string|max:255',
                 'base_price' => 'required|numeric|gt:0',
+                'cargo_type' => 'required|string|max:255',
                 'is_active' => 'required|boolean',
             ]);
 
@@ -100,11 +102,12 @@ class RouteController extends BaseApiController
                 'end_city_id' => (int) $validated['end_city_id'],
                 'details' => $validated['details'],
                 'base_price' => (float) $validated['base_price'],
+                'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
             ]);
 
             $validated['is_active'] = $validated['is_active'] == '1';
-            
+
 
 
             return redirect()->route('routes.index')->with('success', 'Rute berhasil dibuat');
@@ -177,7 +180,7 @@ class RouteController extends BaseApiController
                 return view('routes.edit', ['route' => $route, 'cities' => [], 'error' => 'Gagal memuat data kota']);
             }
 
-            
+
             $cities = $citiesResponse->json('data') ?? [];
 
             return view('routes.edit', compact('route', 'cities'));
@@ -189,7 +192,7 @@ class RouteController extends BaseApiController
 
     public function update(Request $request, string $id)
     {
-       
+
 
         try {
             if (empty($this->baseUrl)) {
@@ -201,6 +204,7 @@ class RouteController extends BaseApiController
                 'end_city_id' => 'required|integer',
                 'details' => 'nullable|string|max:255',
                 'base_price' => 'required|numeric|gt:0',
+                'cargo_type' => 'required|string|max:255',
                 'is_active' => 'required|boolean',
             ]);
 
@@ -209,16 +213,18 @@ class RouteController extends BaseApiController
                 'end_city_id' => (int) $validated['end_city_id'],
                 'details' => $validated['details'],
                 'base_price' => (float) $validated['base_price'],
+                'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
             ]);
 
-            $validated['is_active'] = $validated['is_active'] == '1';       
+            $validated['is_active'] = $validated['is_active'] == '1';
 
             Log::info('Sending payload to PUT /api/routes/{id}', ['id' => $id, 'payload' => [
                 'start_city_id' => (int) $validated['start_city_id'],
                 'end_city_id' => (int) $validated['end_city_id'],
                 'details' => $validated['details'],
                 'base_price' => (float) $validated['base_price'],
+                'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
             ]]);
 

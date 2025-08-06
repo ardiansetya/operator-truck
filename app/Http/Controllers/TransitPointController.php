@@ -88,10 +88,12 @@ class TransitPointController extends BaseApiController
                 return back()->withErrors(['message' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.']);
             }
             $validated = $request->validate([
-                'loadingCityId' => 'required|integer',
-                'unloadingCityId' => 'required|integer',
-                'estimatedDurationMinute' => 'required|integer|min:0',
-                'extraCost' => 'required|numeric|min:0',
+                'loading_city_id' => 'required|integer',
+                'unloading_city_id' => 'required|integer',
+                'estimated_duration_minute' => 'required|integer|min:0',
+                'extra_cost' => 'required|numeric|min:0',
+                'type_cargo' => 'required|string|max:255',
+
             ]);
 
             $response = $this->makeRequest('post', $this->endpoint, $validated);
@@ -181,16 +183,18 @@ class TransitPointController extends BaseApiController
                 'unloading_city_id' => 'required|integer',
                 'estimated_duration_minute' => 'required|integer|min:0',
                 'extra_cost' => 'required|numeric|min:0',
+                'type_cargo' => 'required|string|max:255',
                 'is_active' => 'required|boolean'
             ]);
 
-            
+
 
             $payload = [
                 'loading_city_id' => $validated['loading_city_id'],
                 'unloading_city_id' => $validated['unloading_city_id'],
                 'estimated_duration_minute' => $validated['estimated_duration_minute'],
                 'extra_cost' => $validated['extra_cost'],
+                'type_cargo' => $validated['type_cargo'],
                 'is_active' => (bool) $validated['is_active'],
             ];
 

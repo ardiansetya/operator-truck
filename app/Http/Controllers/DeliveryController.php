@@ -203,6 +203,7 @@ class DeliveryController extends BaseApiController
                 $delivery['start_city_name'] = $route['start_city_name'] ?? $cities->get($route['start_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
                 $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
                 $delivery['base_price'] = $route['base_price'] ?? 0;
+                $delivery['cargo_type'] = $route['cargo_type'] ?? null;
                 $delivery['truck_license_plate'] = $truck['license_plate'] ?? 'Unknown';
                 $delivery['distance_km'] = $route['distance_km'] ?? 0;
                 $delivery['estimated_duration_hours'] = $route['estimated_duration_hours'] ?? 0;

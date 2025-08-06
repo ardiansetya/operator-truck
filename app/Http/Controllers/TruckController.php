@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use PhpParser\Node\Stmt\TryCatch;
 
 class TruckController extends BaseApiController
 {
@@ -28,6 +29,7 @@ class TruckController extends BaseApiController
                 return view('trucks.index', ['trucks' => [], 'error' => 'Gagal memuat data truk: ' . $response->json('error', $response->json('message', 'Kesalahan server'))]);
             }
             $trucks = $response->json('data') ?? [];
+            Log::info('Fetched trucks', ['trucks' => $trucks]);
             if (empty($trucks)) {
                 Log::warning('API returned empty data for trucks', ['response' => $response->body()]);
             }
@@ -52,12 +54,12 @@ class TruckController extends BaseApiController
             $validated = $request->validate([
                 'license_plate' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
-                'cargo_type' => 'required|string|max:255',
+                'type_cargo' => 'required|string|max:255',
                 'capacity_kg' => 'required|numeric|min:0',
                 'is_available' => 'boolean',
             ]);
 
-            $validated['is_available'] = $validated['is_available'] == '1'; 
+            $validated['is_available'] = $validated['is_available'] == '1';
 
             $response = $this->makeRequest('post', $this->endpoint, $validated);
             return redirect()->route('trucks.index')->with('success', 'Truk berhasil dibuat');
@@ -121,7 +123,7 @@ class TruckController extends BaseApiController
                 'license_plate' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
                 'capacity_kg' => 'required|numeric|min:0',
-                'cargo_type' => 'required|string|max:255',
+                'type_cargo' => 'required|string|max:255',
                 'is_available' => 'boolean',
             ]);
 
@@ -144,6 +146,20 @@ class TruckController extends BaseApiController
             }
             $response = $this->makeRequest('delete', "{$this->endpoint}/{$id}");
             return $this->handleApiResponse($response, 'Truk berhasil dihapus', 'Gagal menghapus truk');
+        } catch (\Exception $e) {
+            Log::error('Error deleting truck: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+        }
+    }
+
+    public function maintance(string $id)
+    {
+        try {
+            if (empty($this->baseUrl)) {
+                return back()->withErrors(['message' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.']);
+            }
+            $response = $this->makeRequest('put', "{$this->endpoint}/maintenance/{$id}");
+            return $this->handleApiResponse($response, 'Maintanance Truk berhasil', 'Gagal maintanance truk');
         } catch (\Exception $e) {
             Log::error('Error deleting truck: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);

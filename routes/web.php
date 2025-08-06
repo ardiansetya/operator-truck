@@ -50,6 +50,7 @@ Route::middleware(['auth.token.refresh', 'role:ADMIN'])->group(function () {
     Route::post('/trucks', [TruckController::class, 'store'])->name('trucks.store');
     Route::get('/trucks/{id}/edit', [TruckController::class, 'edit'])->name('trucks.edit');
     Route::put('/trucks/{id}', [TruckController::class, 'update'])->name('trucks.update');
+    Route::put('/trucks/maintance/{id}', [TruckController::class, 'maintance'])->name('trucks.maintance');
     Route::delete('/trucks/{id}', [TruckController::class, 'destroy'])->name('trucks.destroy');
 
     // Delivery Routes
