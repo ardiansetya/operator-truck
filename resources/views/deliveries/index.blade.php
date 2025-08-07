@@ -5,7 +5,7 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Pengiriman</h1>
-                <p class="text-gray-600">Kelola dan pantau semua pengiriman Anda</p>
+                <p class="text-gray-600">Kelola dan pantau semua pengiriman</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 mt-4 lg:mt-0">
                 <a href="{{ route('deliveries.history') }}"
@@ -172,7 +172,7 @@
                                     </div>
                                 </div>
                                  <div class="flex justify-between mt-2">
-                                    <span class="text-gray-600 text-sm">Tipe Muatan:</span>
+                                    <span class="text-gray-600 text-sm">Jenis Muatan:</span>
                                     <span class="font-semibold text-sm text-gray-800">
                                         {{ $delivery['cargo_type'] ?? 'Unknown' }}
                                     </span>
@@ -297,7 +297,7 @@
                     </svg>
                 </div>
                 <h3 class="text-xl font-medium text-gray-800 mb-2">Belum Ada Pengiriman</h3>
-                <p class="text-gray-600 mb-6">Mulai dengan menambahkan pengiriman pertama Anda</p>
+                <p class="text-gray-600 mb-6">Mulai dengan menambahkan pengiriman </p>
                 <a href="{{ route('deliveries.create') }}"
                     class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 transform hover:scale-105 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

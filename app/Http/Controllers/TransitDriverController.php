@@ -77,6 +77,13 @@ class TransitDriverController extends BaseApiController
                         }
                     }
                 }
+                if (!empty($deliveryData['transits']) && is_array($deliveryData['transits'])) {
+                    foreach ($deliveryData['transits'] as $trans) {
+                        if (isset($trans['transit_point']['type_cargo'])) {
+                            $typeCargo = $trans['transit_point']['type_cargo'];
+                        }
+                    }
+                }
 
 
                 // --- 2️⃣ Fetch Truck ---
@@ -98,7 +105,7 @@ class TransitDriverController extends BaseApiController
                     $routeUrl = "{$this->routeEndpoint}/{$transit['transit_point_id']}";
                     Log::info('[DEBUG] Fetching route', ['url' => $routeUrl]);
                     $routeResp = $this->getAuthenticatedHttpClient()->get($routeUrl);
-                    Log::info('[DEBUG] Route response', ['status' => $routeResp->status()]);
+                    Log::info('[DEBUG] Route response', ['data' => $routeResp->json('data')]);
 
                     if ($routeResp->successful()) {
                         $route = $routeResp->json('data');
@@ -130,6 +137,9 @@ class TransitDriverController extends BaseApiController
                     $status = $transit['is_accepted'] ? 'Diterima' : 'Ditolak';
                 }
 
+                
+                
+
                 $drivers[] = [
                     'id' => $transit['id'],
                     'delivery_id' => $transit['delivery_id'],
@@ -137,6 +147,7 @@ class TransitDriverController extends BaseApiController
                     'truck_model' => $truckModel,
                     'route_start' => $routeStart,
                     'route_end' => $routeEnd,
+                    'type_cargo' => $typeCargo,
                     'tarif' => $tarif,
                     'status' => $status,
                     'operator' => $operatorName,

@@ -435,7 +435,7 @@
                                 @endphp
 
                                 <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span class="text-sm text-gray-600">Harga Dasar</span>
+                                    <span class="text-sm text-gray-600">{{ $delivery['start_city_name'] ?? 'Tidak Diketahui' }} - {{ $delivery['end_city_name'] ?? 'Tidak Diketahui' }} ({{ $delivery['cargo_type'] ?? 'Tidak Diketahui' }})</span>
                                     <span class="font-semibold text-gray-900">Rp
                                         {{ number_format($base_price, 0, ',', '.') }}</span>
                                 </div>
@@ -447,6 +447,7 @@
                                                 {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }}
                                                 -
                                                 {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
+                                                ({{ $transit['transit_point']['type_cargo'] ?? 'Tidak Diketahui' }})
                                             </span>
                                             <span class="font-semibold text-gray-900">Rp
                                                 {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}</span>

@@ -74,7 +74,7 @@ class ProfileController extends BaseApiController
             Log::info('Updating profile with payload', ['payload' => $payload]);
 
             // Fetch current profile to check for username change
-            $currentProfileResponse = $this->makeRequest('get', $this->baseUrl . '/api/users/profile');
+            $currentProfileResponse = $this->makeRequest('post', $this->baseUrl . '/api/users/profile');
             if ($currentProfileResponse instanceof \Illuminate\Http\RedirectResponse) {
                 return $currentProfileResponse;
             }
@@ -167,14 +167,16 @@ class ProfileController extends BaseApiController
             $validated = $request->validate([
                 'current_password' => 'required|string|min:8',
                 'new_password' => 'required|string|min:8|confirmed',
+                'confirm_password' => 'required|string|min:8',
             ]);
 
             $payload = [
-                'currentPassword' => $validated['current_password'],
-                'newPassword' => $validated['new_password'],
+                'current_password' => $validated['current_password'],
+                'new_password' => $validated['new_password'],
+                'confirm_password' => $validated['confirm_password'],
             ];
 
-            Log::info('Updating password with payload', ['payload' => array_merge($payload, ['newPassword' => '****'])]);
+            Log::info('Updating password with payload', ['payload' => array_merge($payload)]);
 
             $response = $this->makeRequest('patch', $this->baseUrl . '/api/users/profile/password', $payload);
             if ($response instanceof \Illuminate\Http\RedirectResponse) {

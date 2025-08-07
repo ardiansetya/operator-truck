@@ -54,7 +54,7 @@ class TruckController extends BaseApiController
             $validated = $request->validate([
                 'license_plate' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
-                'type_cargo' => 'required|string|max:255',
+                'cargo_type' => 'required|string|max:255',
                 'capacity_kg' => 'required|numeric|min:0',
                 'is_available' => 'boolean',
             ]);
@@ -123,7 +123,7 @@ class TruckController extends BaseApiController
                 'license_plate' => 'required|string|max:255',
                 'model' => 'required|string|max:255',
                 'capacity_kg' => 'required|numeric|min:0',
-                'type_cargo' => 'required|string|max:255',
+                'cargo_type' => 'required|string|max:255',
                 'is_available' => 'boolean',
             ]);
 

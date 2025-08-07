@@ -137,7 +137,7 @@
                 </div>
 
                 <!-- Detail Section -->
-                @if($route['type_cargo'])
+                @if($route['cargo_type'])
                 <div class="mt-8 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
                     <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center">
                         <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@
                         </svg>
                         Detail Rute
                     </h3>
-                    <p class="text-gray-700 leading-relaxed">{{ $route['type_cargo'] }}</p>
+                    <p class="text-gray-700 leading-relaxed">{{ $route['cargo_type'] }}</p>
                 </div>
                 @endif
             </div>

@@ -18,9 +18,9 @@
                 </svg>
             </div>
             <div>
-                <h2 class="text-lg font-medium text-gray-700">Total Kota</h2>
-                <p class="text-3xl font-semibold text-gray-800">{{ $citiesCount ?? 0 }}</p>
-                <p class="text-sm text-gray-500">Kota yang terdaftar</p>
+                <h2 class="text-lg font-medium text-gray-700">Total Rute</h2>
+                <p class="text-3xl font-semibold text-gray-800">{{ $routesCount ?? 0 }}</p>
+                <p class="text-sm text-gray-500">Rute yang terdaftar</p>
             </div>
         </div>
 

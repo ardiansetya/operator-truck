@@ -156,19 +156,29 @@
                             </svg>
                             Rute Transit
                         </h4>
-                        <div class="bg-blue-50 p-3 rounded-lg">
-                            <div class="flex items-center text-sm">
-                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                                <span class="text-gray-700">{{ $driver['route_start'] ?? 'Tidak tersedia' }}</span>
+                         <div class="bg-blue-50 p-3 rounded-lg ">
+                                <div class="flex items-center justify-center">
+                                    <div class="flex items-center text-sm">
+                                        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-700">{{ $driver['route_start'] ?? 'Tidak tersedia' }}</span>
+                                    </div>
+                                    <div class="flex items-center my-2">
+                                        <div class="w-16 border-b-2 border-dashed border-gray-300 mx-2"></div>
+                                    </div>
+                                    <div class="flex items-center text-sm">
+                                        <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-700">{{ $driver['route_end'] ?? 'Tidak tersedia' }}</span>
+                                    </div>
+                                </div>
+                                 <div class="flex justify-between mt-2">
+                                    <span class="text-gray-600 text-sm">Jenis Muatan:</span>
+                                    <span class="font-semibold text-sm text-gray-800">
+                                        {{ $driver['type_cargo'] ?? 'Unknown' }}
+                                    </span>
+                                </div>
+
                             </div>
-                            <div class="flex items-center my-2">
-                                <div class="w-3 h-6 border-l-2 border-dashed border-gray-300 ml-1"></div>
-                            </div>
-                            <div class="flex items-center text-sm">
-                                <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
-                                <span class="text-gray-700">{{ $driver['route_end'] ?? 'Tidak tersedia' }}</span>
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Vehicle Info -->

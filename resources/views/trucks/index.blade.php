@@ -5,7 +5,7 @@
     <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8">
         <div>
             <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Truk</h1>
-            <p class="text-gray-600">Kelola dan pantau semua truk Anda</p>
+            <p class="text-gray-600">Kelola dan pantau semua truk</p>
         </div>
         <div class="mt-4 lg:mt-0">
             <a href="{{ route('trucks.create') }}" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center gap-2">
@@ -228,7 +228,7 @@
                     </svg>
                 </div>
                 <h3 class="text-xl font-medium text-gray-800 mb-2">Belum Ada Truk</h3>
-                <p class="text-gray-600 mb-6">Mulai dengan menambahkan truk pertama Anda</p>
+                <p class="text-gray-600 mb-6">Mulai dengan menambahkan truk pertama</p>
                 <a href="{{ route('trucks.create') }}" 
                    class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 transform hover:scale-105 shadow-lg">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

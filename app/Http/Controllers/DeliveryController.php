@@ -434,6 +434,7 @@ class DeliveryController extends BaseApiController
                             ],
                             'estimated_duration_minute' => $transit_point['estimated_duration_minute'] ?? null,
                             'extra_cost' => $transit_point['extra_cost'] ?? null,
+                            'cargo_type' => $transit_point['cargo_type'] ?? null,
                             'is_active' => $transit_point['is_active'] ?? false,
                         ],
                         'arrived_at' => $transit['arrived_at'] ?? null,
@@ -458,6 +459,7 @@ class DeliveryController extends BaseApiController
             $delivery['end_city_name'] = $route['end_city_name'] ?? $cities->get($route['end_id'] ?? null, ['name' => 'Unknown'])['name'] ?? 'Unknown';
             $delivery['base_price'] = $route['base_price'] ?? 0;
             $delivery['distance_km'] = $route['distance_km'] ?? 0;
+            $delivery['cargo_type'] = $route['cargo_type'] ?? 0;
             $delivery['estimated_duration_hours'] = $route['estimated_duration_hours'] ?? 0;
             $delivery['truck_model'] = $trucks->get($delivery['truck_id'] ?? null, ['model' => 'Unknown'])['model'] ?? 'Unknown';
             $delivery['truck_license_plate'] = $trucks->get($delivery['truck_id'] ?? null, ['license_plate' => 'Unknown'])['license_plate'] ?? 'Unknown';

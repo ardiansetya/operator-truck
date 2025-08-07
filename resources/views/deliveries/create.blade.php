@@ -79,7 +79,7 @@
                         <select name="route_id" id="route_id" class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 bg-gray-50 focus:bg-white" required>
                             <option value="">Pilih Rute</option>
                             @foreach ($routes as $route)
-                                <option value="{{ $route['id'] }}" {{ old('route_id') == $route['id'] ? 'selected' : '' }}>{{ $route['start_city_name'] }} - {{ $route['end_city_name'] }}</option>
+                                <option value="{{ $route['id'] }}" {{ old('route_id') == $route['id'] ? 'selected' : '' }}>{{ $route['start_city_name'] }} - {{ $route['end_city_name'] }} ({{ $route['cargo_type'] }})</option>
                             @endforeach
                         </select>
                         @error('route_id')
