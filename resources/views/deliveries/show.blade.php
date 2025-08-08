@@ -447,7 +447,7 @@
                                                 {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }}
                                                 -
                                                 {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
-                                                ({{ $transit['transit_point']['type_cargo'] ?? 'Tidak Diketahui' }})
+                                                ({{ $transit['transit_point']['type_cargo'] ?? '-' }})
                                             </span>
                                             <span class="font-semibold text-gray-900">Rp
                                                 {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}</span>
