@@ -50,62 +50,43 @@
 
         <!-- Statistics Cards -->
         @if (!empty($routes))
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Total Rute</p>
-                            <p class="text-2xl font-bold text-gray-800">{{ count($routes) }}</p>
-                        </div>
-                        <div class="bg-blue-100 p-3 rounded-full">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Rute Aktif</p>
-                            <p class="text-2xl font-bold text-green-600">{{ collect($routes)->where('is_active', true)->count() }}</p>
-                        </div>
-                        <div class="bg-green-100 p-3 rounded-full">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Rute Non-Aktif</p>
-                            <p class="text-2xl font-bold text-red-600">{{ collect($routes)->where('is_active', false)->count() }}</p>
-                        </div>
-                        <div class="bg-red-100 p-3 rounded-full">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                {{-- <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Rata-rata Harga</p>
-                            <p class="text-2xl font-bold text-purple-600">
-                                Rp {{ number_format(collect($routes)->avg('base_price'), 0, ',', '.') }}
-                            </p>
-                        </div>
-                        <div class="bg-purple-100 p-3 rounded-full">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div> --}}
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Rute Aktif -->
+    <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-xl text-white shadow-lg">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-green-100 text-sm font-medium mb-1">Rute Aktif</p>
+                <p class="text-3xl font-bold">{{ collect($routes)->where('is_active', true)->count() }}</p>
+                <p class="text-green-100 text-xs mt-1">sedang digunakan</p>
             </div>
+            <div class="bg-green-400 bg-opacity-30 p-3 rounded-lg">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rute Non-Aktif -->
+    <div class="bg-gradient-to-br from-red-500 to-red-600 p-6 rounded-xl text-white shadow-lg">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-red-100 text-sm font-medium mb-1">Rute Non-Aktif</p>
+                <p class="text-3xl font-bold">{{ collect($routes)->where('is_active', false)->count() }}</p>
+                <p class="text-red-100 text-xs mt-1">tidak digunakan</p>
+            </div>
+            <div class="bg-red-400 bg-opacity-30 p-3 rounded-lg">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+
         @endif
 
         <!-- Routes Grid -->
