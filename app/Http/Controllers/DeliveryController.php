@@ -643,6 +643,13 @@ class DeliveryController extends BaseApiController
                 return collect($response->json('data') ?? [])->keyBy('id');
             });
 
+            // ✅ Sort by finished_at terbaru (epoch time)
+            $deliveries = collect($deliveries)->sortByDesc(function ($delivery) {
+                // Kalau finished_at null, fallback ke started_at (juga epoch time)
+                return $delivery['finished_at'] ?? $delivery['started_at'] ?? 0;
+            })->values()->toArray();
+
+
             // Enrich deliveries
             foreach ($deliveries as &$delivery) {
                 $route = $routes->get($delivery['route_id'] ?? '', []) ?: [];
@@ -660,6 +667,11 @@ class DeliveryController extends BaseApiController
                 $delivery['started_at'] = $delivery['started_at'] ?? null;
                 $delivery['finished_at'] = $delivery['finished_at'] ?? null; // ✅ Tambahkan finished_at untuk history
             }
+
+            $deliveries = collect($deliveries)->sortByDesc(function ($delivery) {
+                $date = $delivery['finished_at'] ?? $delivery['started_at'] ?? null;
+                return $date ? strtotime($date) : 0;
+            })->values()->toArray();
 
             Log::info('Deliveries history processed successfully', [
                 'deliveries_count' => count($deliveries),
