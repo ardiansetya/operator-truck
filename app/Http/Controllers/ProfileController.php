@@ -321,13 +321,13 @@ class ProfileController extends BaseApiController
             $validated = $request->validate([
                 'current_password' => 'required|string|min:8',
                 'new_password' => 'required|string|min:8|confirmed',
-                'confirm_password' => 'required|string|min:8',
+                'new_password_confirmation' => 'required|string|min:8',
             ]);
 
             $payload = [
                 'current_password' => $validated['current_password'],
                 'new_password' => $validated['new_password'],
-                'confirm_password' => $validated['confirm_password'],
+                'confirm_password' => $validated['new_password_confirmation'],
             ];
 
             Log::info('Updating password');
