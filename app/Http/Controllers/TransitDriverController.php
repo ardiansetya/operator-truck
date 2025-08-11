@@ -78,9 +78,10 @@ class TransitDriverController extends BaseApiController
                     }
                 }
                 if (!empty($deliveryData['transits']) && is_array($deliveryData['transits'])) {
+                    Log::debug('[DEBUG] Delivery data:', $deliveryData);
                     foreach ($deliveryData['transits'] as $trans) {
-                        if (isset($trans['transit_point']['type_cargo'])) {
-                            $typeCargo = $trans['transit_point']['type_cargo'];
+                        if (isset($trans['transit_point']['cargo_type'])) {
+                            $typeCargo = $trans['transit_point']['cargo_type'];
                         }
                     }
                 }
@@ -137,8 +138,8 @@ class TransitDriverController extends BaseApiController
                     $status = $transit['is_accepted'] ? 'Diterima' : 'Ditolak';
                 }
 
-                
-                
+
+
 
                 $drivers[] = [
                     'id' => $transit['id'],
@@ -164,7 +165,7 @@ class TransitDriverController extends BaseApiController
                 return 0; // jika sama
             });
 
-            
+
 
             Log::info('[DEBUG] Final driver data', ['count' => count($drivers)]);
 
@@ -188,7 +189,7 @@ class TransitDriverController extends BaseApiController
             'is_accepted' => 'required|in:true,false,1,0',
             'reason' => 'nullable|string'
         ]);
-        
+
 
         try {
             // Konversi ke boolean

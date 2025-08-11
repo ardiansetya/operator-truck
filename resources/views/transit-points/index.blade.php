@@ -40,7 +40,7 @@
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['loading_city_name'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['unloading_city_name'] }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['estimated_duration_minute'] }} Menit</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['type_cargo']}}</td>
+                        <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ $transitPoint['cargo_type']}}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">{{ number_format($transitPoint['extra_cost'], 2) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 border-b border-gray-100">
                             @if ($transitPoint['is_active'] == 1)

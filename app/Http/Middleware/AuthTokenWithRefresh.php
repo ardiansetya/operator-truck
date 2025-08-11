@@ -112,7 +112,7 @@ class AuthTokenWithRefresh
                 // Update session with new tokens
                 session([
                     'access_token' => $data['access_token'],
-                    // 'refresh_token' => $data['refresh_token'],
+                    'refresh_token' => $data['refresh_token'],
                     'token_type' => $data['tokenType'] ?? 'Bearer',
                 ]);
 

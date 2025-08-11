@@ -30,6 +30,7 @@ class TransitPointController extends BaseApiController
                 return view('transit-points.index', ['transitPoints' => [], 'error' => 'Gagal memuat data transit point: ' . $transitResponse->json('error', $transitResponse->json('message', 'Kesalahan server'))]);
             }
             $transitPoints = $transitResponse->json('data') ?? [];
+            log::debug('Transit point data:', $transitPoints);
 
             // Fetch cities
             $citiesResponse = $this->makeRequest('get', $this->baseUrl . '/api/cities');

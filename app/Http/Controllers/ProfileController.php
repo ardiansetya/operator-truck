@@ -64,6 +64,7 @@ class ProfileController extends BaseApiController
                 'age' => 'required|integer|min:18',
             ]);
 
+            // Pastikan payload dikirim sebagai JSON object yang benar
             $payload = [
                 'username' => $validated['username'],
                 'email' => $validated['email'],
@@ -74,12 +75,13 @@ class ProfileController extends BaseApiController
             Log::info('Updating profile with payload', ['payload' => $payload]);
 
             // Fetch current profile to check for username change
-            $currentProfileResponse = $this->makeRequest('post', $this->baseUrl . '/api/users/profile');
+            $currentProfileResponse = $this->makeRequest('get', $this->baseUrl . '/api/users/profile');
             if ($currentProfileResponse instanceof \Illuminate\Http\RedirectResponse) {
                 return $currentProfileResponse;
             }
             $currentUsername = $currentProfileResponse->successful() ? ($currentProfileResponse->json('data')['username'] ?? '') : '';
 
+            // Update profile menggunakan POST sesuai dengan endpoint backend
             $response = $this->makeRequest('post', $this->baseUrl . '/api/users/profile', $payload);
             if ($response instanceof \Illuminate\Http\RedirectResponse) {
                 return $response;
@@ -87,21 +89,61 @@ class ProfileController extends BaseApiController
 
             if (!$response->successful()) {
                 $status = $response->status();
-                $errorMessage = $status === 403
-                    ? 'Akses ditolak: Tidak memiliki izin untuk memperbarui profil'
-                    : ($status === 401
-                        ? 'Token tidak valid atau kadaluarsa'
-                        : 'Gagal memperbarui profil: ' . $response->json('message', 'Kesalahan server'));
-                Log::error('Failed to update profile', ['status' => $status, 'body' => $response->body()]);
+                $responseBody = $response->body();
+                $errorData = $response->json();
+
+                // Enhanced error handling untuk JSON parse errors
+                if (isset($errorData['errors']) && str_contains($errorData['errors'], 'JSON parse error')) {
+                    Log::error('JSON parse error detected', [
+                        'payload' => $payload,
+                        'payload_json' => json_encode($payload),
+                        'response' => $responseBody
+                    ]);
+                    $errorMessage = 'Format data tidak valid. Silakan periksa input Anda.';
+                } else {
+                    $errorMessage = $status === 403
+                        ? 'Akses ditolak: Tidak memiliki izin untuk memperbarui profil'
+                        : ($status === 401
+                            ? 'Token tidak valid atau kadaluarsa'
+                            : 'Gagal memperbarui profil: ' . $response->json('message', 'Kesalahan server'));
+                }
+
+                Log::error('Failed to update profile', [
+                    'status' => $status,
+                    'body' => $responseBody,
+                    'payload' => $payload,
+                    'headers' => $response->headers()
+                ]);
                 return back()->withErrors(['message' => $errorMessage]);
             }
 
-            // SOLUSI 1: Jika username berubah, refresh token secara proaktif
-            if ($currentUsername && $currentUsername !== $validated['username']) {
-                Log::info('Username changed, refreshing access token proactively', ['new_username' => $validated['username']]);
+            // ✅ IMPLEMENTASI FLOW SEPERTI REACT NATIVE
+            $responseData = $response->json('data') ?? $response->json();
 
-                if (!$this->refreshAccessTokenProactively()) {
-                    Log::warning('Failed to refresh token after username change, but profile was updated');
+            // Jika backend mengembalikan refresh_token baru (seperti di React Native)
+            if (isset($responseData['refresh_token'])) {
+                Log::info('Backend returned new refresh_token, updating session');
+
+                // Update refresh token di session
+                session(['refresh_token' => $responseData['refresh_token']]);
+
+                // Refresh access token menggunakan refresh token baru
+                if ($this->refreshTokenAfterProfileUpdate()) {
+                    Log::info('Successfully refreshed access token after profile update');
+                } else {
+                    Log::warning('Failed to refresh access token, but profile was updated');
+                }
+            }
+            // Jika username berubah tapi tidak ada refresh_token baru dalam response
+            else if ($currentUsername && $currentUsername !== $validated['username']) {
+                Log::info('Username changed but no new refresh_token in response, attempting token refresh', [
+                    'old_username' => $currentUsername,
+                    'new_username' => $validated['username']
+                ]);
+
+                // Coba refresh dengan refresh token yang ada
+                if (!$this->handleUsernameChangeTokenRefresh()) {
+                    Log::warning('Token refresh failed after username change, user may need to re-login on next request');
                     // Tidak redirect ke login, biarkan middleware handle di request selanjutnya
                 }
             }
@@ -114,45 +156,157 @@ class ProfileController extends BaseApiController
     }
 
     /**
-     * Refresh access token proactively without invalidating current session
+     * Refresh access token after profile update (similar to React Native flow)
+     * Menggunakan refresh token yang baru dari backend response
      */
-    private function refreshAccessTokenProactively()
+    private function refreshTokenAfterProfileUpdate()
     {
         try {
             $refresh_token = session('refresh_token');
             if (!$refresh_token) {
-                Log::warning('No refresh token found for proactive refresh');
+                Log::warning('No refresh token found after profile update');
                 return false;
             }
 
-            Log::info('Attempting proactive token refresh');
-            $response = \Illuminate\Support\Facades\Http::withHeaders(['Accept' => 'application/json'])
-                ->post($this->baseUrl . '/api/auth/refresh-token', [
+            Log::info('Attempting to refresh access token after profile update');
+
+            // Menggunakan endpoint yang sama dengan middleware
+            $response = \Illuminate\Support\Facades\Http::withHeaders([
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+            ])
+                ->timeout(15)
+                ->post($this->baseUrl . '/auth/refresh-token', [
                     'refresh_token' => $refresh_token
                 ]);
 
             if ($response->successful()) {
-                $data = $response->json('data') ?? $response->json();
-                if (!isset($data['accessToken']) || !isset($data['refresh_token'])) {
-                    Log::error('Invalid refresh token response format', ['body' => $response->body()]);
+                $data = $response->json('data');
+
+                if (isset($data['access_token'])) {
+                    // Update session dengan access token baru
+                    session([
+                        'access_token' => $data['access_token'],
+                        'token_type' => $data['tokenType'] ?? $data['token_type'] ?? 'Bearer',
+                    ]);
+
+                    Log::info('Access token refreshed successfully after profile update');
+                    return true;
+                } else {
+                    Log::error('Invalid refresh response format after profile update', [
+                        'response_data' => $data
+                    ]);
                     return false;
                 }
+            }
 
-                // Update session dengan token baru
-                session([
-                    'access_token' => $data['accessToken'],
-                    'refresh_token' => $data['refresh_token'],
-                    'token_type' => $data['tokenType'] ?? 'Bearer',
+            Log::error('Failed to refresh access token after profile update', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Exception during token refresh after profile update: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Handle token refresh after username change with better error handling
+     */
+    private function handleUsernameChangeTokenRefresh()
+    {
+        try {
+            $refresh_token = session('refresh_token');
+            if (!$refresh_token) {
+                Log::warning('No refresh token found for username change refresh');
+                return false;
+            }
+
+            Log::info('Attempting token refresh after username change');
+
+            // Debug: Log refresh token (hashed untuk security)
+            Log::debug('Using refresh token for username change', [
+                'token_hash' => substr(md5($refresh_token), 0, 8)
+            ]);
+
+            // Coba beberapa endpoint yang mungkin
+            $endpoints = [
+                '/auth/refresh-token',  // Seperti di middleware
+                '/api/auth/refresh-token'  // Alternative endpoint
+            ];
+
+            foreach ($endpoints as $endpoint) {
+                Log::info("Trying refresh endpoint: {$endpoint}");
+
+                $response = \Illuminate\Support\Facades\Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'Content-Type' => 'application/json'
+                ])
+                    ->timeout(15)
+                    ->post($this->baseUrl . $endpoint, [
+                        'refresh_token' => $refresh_token
+                    ]);
+
+                Log::info("Response from {$endpoint}", [
+                    'status' => $response->status(),
+                    'success' => $response->successful(),
+                    'body' => $response->body()
                 ]);
 
-                Log::info('Token refreshed proactively after username change');
+                if ($response->successful()) {
+                    $data = $response->json('data');
+
+                    if (isset($data['access_token'])) {
+                        // Update session dengan token baru
+                        session([
+                            'access_token' => $data['access_token'],
+                            'token_type' => $data['tokenType'] ?? $data['token_type'] ?? 'Bearer',
+                        ]);
+
+                        Log::info('Token successfully refreshed after username change with endpoint: ' . $endpoint);
+                        return true;
+                    } else {
+                        Log::error('Invalid refresh response format from ' . $endpoint, [
+                            'response_data' => $data
+                        ]);
+                    }
+                }
+            }
+
+            Log::error('All refresh endpoints failed after username change');
+            return false;
+        } catch (\Exception $e) {
+            Log::error('Exception during username change token refresh: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Validate current access token
+     * Menggunakan method yang sama dengan middleware
+     */
+    private function validateAccessToken()
+    {
+        try {
+            $response = \Illuminate\Support\Facades\Http::withToken(session('access_token'))
+                ->withHeaders(['Accept' => 'application/json'])
+                ->timeout(10)
+                ->get($this->baseUrl . '/api/users/profile');
+
+            if ($response->successful()) {
+                Log::debug('Access token validated successfully in ProfileController');
                 return true;
             }
 
-            Log::error('Failed to refresh token proactively', ['status' => $response->status(), 'body' => $response->body()]);
+            Log::warning('Access token validation failed in ProfileController', [
+                'status' => $response->status(),
+            ]);
             return false;
         } catch (\Exception $e) {
-            Log::error('Proactive token refresh error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            Log::error('Token validation error in ProfileController: ' . $e->getMessage());
             return false;
         }
     }
@@ -176,7 +330,7 @@ class ProfileController extends BaseApiController
                 'confirm_password' => $validated['confirm_password'],
             ];
 
-            Log::info('Updating password with payload', ['payload' => array_merge($payload)]);
+            Log::info('Updating password');
 
             $response = $this->makeRequest('patch', $this->baseUrl . '/api/users/profile/password', $payload);
             if ($response instanceof \Illuminate\Http\RedirectResponse) {
