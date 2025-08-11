@@ -21,6 +21,10 @@ class DeliveryController extends BaseApiController
             'routes_for_deliveries',
             'trucks_for_deliveries', 
             'workers_for_deliveries',
+            'deliveries_history',
+            'routes_for_history',
+            'trucks_for_history',
+            'workers_for_history',
         ];
         
         foreach ($cacheKeys as $key) {
@@ -308,6 +312,7 @@ class DeliveryController extends BaseApiController
     public function show(string $id)
     {
         try {
+            $this->clearDeliveryRelatedCaches();
             // Ambil data pengiriman dari API
             $deliveryResponse = $this->makeRequest('GET', "{$this->endpoint}/detail/{$id}");
             if ($deliveryResponse instanceof \Illuminate\Http\RedirectResponse) {
@@ -488,7 +493,7 @@ class DeliveryController extends BaseApiController
                 return $response;
             }
 
-            Cache::forget('deliveries_active');
+            $this->clearDeliveryRelatedCaches();
             return $this->handleApiResponse($response, 'Pengiriman berhasil diselesaikan', 'Gagal menyelesaikan pengiriman');
         } catch (\Exception $e) {
             Log::error('Error finishing delivery: ' . $e->getMessage(), ['trace' => $e->getTraceAsString(), 'id' => $id]);
