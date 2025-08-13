@@ -1,5 +1,7 @@
 @extends('layouts.dashboard')
 
+@section('title', 'Tambah Pengiriman Baru')
+
 @section('content')
 <div class="min-h-screen py-8">
     <div class="container mx-auto px-6 max-w-2xl">
@@ -102,7 +104,7 @@
                     </div>
 
                     <!-- Latitude -->
-                    <div>
+                    <div class="hidden">
                         <label for="latitude" class="block text-sm font-semibold text-gray-700 mb-2">Latitude</label>
                         <input type="number" step="any" name="latitude" id="latitude" value="{{ old('latitude', -6.200000) }}" 
                                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 bg-gray-50 focus:bg-white" required>
@@ -112,7 +114,7 @@
                     </div>
 
                     <!-- Longitude -->
-                    <div>
+                    <div  class="hidden">
                         <label for="longitude" class="block text-sm font-semibold text-gray-700 mb-2">Longitude</label>
                         <input type="number" step="any" name="longitude" id="longitude" value="{{ old('longitude', 106.816666) }}" 
                                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 bg-gray-50 focus:bg-white" required>

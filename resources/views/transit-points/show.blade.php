@@ -1,4 +1,6 @@
 @extends('layouts.dashboard')
+
+@section('title', 'Detail Transit Point')
 @section('content')
 <div class="container mx-auto px-6 py-8">
     <div class="flex justify-between items-center mb-6">

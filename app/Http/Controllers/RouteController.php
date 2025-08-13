@@ -91,7 +91,7 @@ class RouteController extends BaseApiController
             $validated = $request->validate([
                 'start_city_id' => 'required|integer',
                 'end_city_id' => 'required|integer',
-                'details' => 'nullable|string|max:255',
+                'cargo_type' => 'nullable|string|max:255',
                 'base_price' => 'required|numeric|gt:0',
                 'cargo_type' => 'required|string|max:255',
                 'is_active' => 'required|boolean',
@@ -100,7 +100,7 @@ class RouteController extends BaseApiController
             $response = $this->makeRequest('post', $this->endpoint, [
                 'start_city_id' => (int) $validated['start_city_id'],
                 'end_city_id' => (int) $validated['end_city_id'],
-                'details' => $validated['details'],
+                'cargo_type' => $validated['cargo_type'],
                 'base_price' => (float) $validated['base_price'],
                 'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
@@ -202,7 +202,7 @@ class RouteController extends BaseApiController
             $validated = $request->validate([
                 'start_city_id' => 'required|integer',
                 'end_city_id' => 'required|integer',
-                'details' => 'nullable|string|max:255',
+                'cargo_type' => 'nullable|string|max:255',
                 'base_price' => 'required|numeric|gt:0',
                 'cargo_type' => 'required|string|max:255',
                 'is_active' => 'required|boolean',
@@ -211,7 +211,7 @@ class RouteController extends BaseApiController
             $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", [
                 'start_city_id' => (int) $validated['start_city_id'],
                 'end_city_id' => (int) $validated['end_city_id'],
-                'details' => $validated['details'],
+                'cargo_type' => $validated['cargo_type'],
                 'base_price' => (float) $validated['base_price'],
                 'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
@@ -222,7 +222,7 @@ class RouteController extends BaseApiController
             Log::info('Sending payload to PUT /api/routes/{id}', ['id' => $id, 'payload' => [
                 'start_city_id' => (int) $validated['start_city_id'],
                 'end_city_id' => (int) $validated['end_city_id'],
-                'details' => $validated['details'],
+                'cargo_type' => $validated['cargo_type'],
                 'base_price' => (float) $validated['base_price'],
                 'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
@@ -256,4 +256,48 @@ class RouteController extends BaseApiController
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
         }
     }
+
+    // public function nonaktifkan(string $id)
+    // {
+    //     try {
+    //         if (empty($this->baseUrl)) {
+    //             return back()->withErrors(['message' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.']);
+    //         }
+
+    //         // Ambil data lama dari BE
+    //         $getResponse = $this->makeRequest('get', "{$this->endpoint}/{$id}");
+    //         if ($getResponse instanceof \Illuminate\Http\RedirectResponse) {
+    //             return $getResponse;
+    //         }
+
+
+    //         $routeData = $getResponse->json();
+
+    //         // Pastikan snake_case sesuai requirement BE
+    //         $payload = [
+    //             'start_city_id' => $routeData['start_city_id'],
+    //             'end_city_id'   => $routeData['end_city_id'],
+    //             'cargo_type'       => $routeData['cargo_type'],
+    //             'cargo_type'    => $routeData['cargo_type'],
+    //             'base_price'    => $routeData['base_price'],
+    //             'is_active'     => false
+    //         ];
+
+    //         // Kirim PUT dengan payload
+    //         $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", $payload);
+
+    //         if ($response instanceof \Illuminate\Http\RedirectResponse) {
+    //             return $response;
+    //         }
+
+    //         $errorMessage = $response->status() === 403
+    //             ? 'Anda tidak memiliki izin untuk menonaktifkan rute ini'
+    //             : 'Gagal menonaktifkan rute';
+
+    //         return $this->handleApiResponse($response, 'Rute berhasil dinonaktifkan', $errorMessage);
+    //     } catch (\Exception $e) {
+    //         Log::error('Error nonaktifkan route: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+    //         return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+    //     }
+    // }
 }

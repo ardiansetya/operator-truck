@@ -1,5 +1,7 @@
 @extends('layouts.dashboard')
 
+@section('title', 'Detail Rute')
+
 @section('content')
 <div class="min-h-screen  py-8">
     <div class="container mx-auto px-6">

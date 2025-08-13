@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\View;
 
 abstract class BaseApiController extends Controller
 {
     protected string $baseUrl;
     protected string $endpoint;
+    protected $currentUser;
 
     public function __construct()
     {
@@ -19,6 +22,24 @@ abstract class BaseApiController extends Controller
             $this->baseUrl = '';
         } else {
             $this->baseUrl = rtrim($baseUrl, '/');
+        }
+
+        // Ambil token dari session
+        $token = Session::get('access_token');
+
+        if ($token) {
+            try {
+                $response = Http::withToken($token)
+                    ->get("{$this->baseUrl}/api/users/profile");
+
+                if ($response->successful()) {
+                    $this->currentUser = $response->json('data');
+                    // Share ke semua view
+                    View::share('currentUser', $this->currentUser);
+                }
+            } catch (\Exception $e) {
+                $this->currentUser = null;
+            }
         }
     }
 

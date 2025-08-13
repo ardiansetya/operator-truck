@@ -1,5 +1,7 @@
 @extends('layouts.dashboard')
 
+@section('title', 'Edit Transit Point')
+
 @section('content')
     <div class="min-h-screen py-8">
         <div class="container mx-auto px-6 max-w-2xl">
@@ -115,6 +117,19 @@
                             class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-gray-50 focus:bg-white"
                             placeholder="Masukkan durasi (menit)" required min="0">
                         @error('estimated_duration_minute')
+                            <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <!-- Cargo Type -->
+                    <div class="mb-6">
+                        <label for="cargo_type" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Jenis Muatan
+                        </label>
+                        <input type="text" name="cargo_type" id="cargo_type"
+                            value="{{ old('cargo_type', $transitPoint['cargo_type']) }}"
+                            class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-gray-50 focus:bg-white"
+                            placeholder="Pakan, Pasir, dll" required min="0">
+                        @error('cargo_type')
                             <span class="text-red-500 text-sm mt-1">{{ $message }}</span>
                         @enderror
                     </div>

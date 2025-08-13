@@ -439,7 +439,7 @@ class DeliveryController extends BaseApiController
                             ],
                             'estimated_duration_minute' => $transit_point['estimated_duration_minute'] ?? null,
                             'extra_cost' => $transit_point['extra_cost'] ?? null,
-                            'type_cargo' => $transit_point['type_cargo'] ?? null,
+                            'cargo_type' => $transit_point['cargo_type'] ?? null,
                             'is_active' => $transit_point['is_active'] ?? false,
                         ],
                         'arrived_at' => $transit['arrived_at'] ?? null,

@@ -18,6 +18,8 @@
         <!-- Tailwind CDN fallback -->
         <script src="https://cdn.tailwindcss.com"></script>
     @endif
+
+     <link rel="icon" href="{{ asset('favicon.ico') }}">
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 

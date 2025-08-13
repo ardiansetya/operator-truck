@@ -1,5 +1,7 @@
 @extends('layouts.dashboard')
 
+@section('title', 'Tambah Rute Baru')
+
 @section('content')
 <div class="min-h-screen py-8">
     <div class="container mx-auto px-6 max-w-2xl">
@@ -130,7 +132,7 @@
                         </label>
                         <input type="text" name="cargo_type" id="cargo_type" value="{{ old('cargo_type') }}" 
                                class="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:ring-0 transition-colors duration-200 bg-gray-50 focus:bg-white" 
-                               placeholder="Contoh: Via Tol, Jalur Alternatif, dll" required>
+                               placeholder="Contoh: Pasir, Pakan, Tanah" required>
                         @error('cargo_type')
                             <span class="text-red-500 text-sm mt-1 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">

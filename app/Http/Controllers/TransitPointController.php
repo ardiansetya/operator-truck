@@ -93,12 +93,20 @@ class TransitPointController extends BaseApiController
                 'unloading_city_id' => 'required|integer',
                 'estimated_duration_minute' => 'required|integer|min:0',
                 'extra_cost' => 'required|numeric|min:0',
-                'type_cargo' => 'required|string|max:255',
+                'cargo_type' => 'required|string|max:255',
+                'is_active' => 'required|boolean'
 
             ]);
 
+            $validated['is_active'] = $validated['is_active'] == '1';
+
+
+           
+
+
+
             $response = $this->makeRequest('post', $this->endpoint, $validated);
-            return $this->handleApiResponse($response, 'Transit point berhasil ditambahkan', 'Gagal menambahkan transit point');
+            return redirect()->route('transit-points.index')->with('success', 'Transit point berhasil dibuat');
         } catch (\Exception $e) {
             Log::error('Error creating transit point: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
@@ -184,7 +192,7 @@ class TransitPointController extends BaseApiController
                 'unloading_city_id' => 'required|integer',
                 'estimated_duration_minute' => 'required|integer|min:0',
                 'extra_cost' => 'required|numeric|min:0',
-                'type_cargo' => 'required|string|max:255',
+                'cargo_type' => 'required|string|max:255',
                 'is_active' => 'required|boolean'
             ]);
 
@@ -195,13 +203,13 @@ class TransitPointController extends BaseApiController
                 'unloading_city_id' => $validated['unloading_city_id'],
                 'estimated_duration_minute' => $validated['estimated_duration_minute'],
                 'extra_cost' => $validated['extra_cost'],
-                'type_cargo' => $validated['type_cargo'],
+                'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
             ];
 
             $response = $this->makeRequest('put', "{$this->endpoint}/{$id}", $payload);
 
-            return $this->handleApiResponse($response, 'Transit point berhasil diperbarui', 'Gagal memperbarui transit point');
+            return redirect()->route('transit-points.index')->with('success', 'Transit point berhasil diperbarui');
         } catch (\Exception $e) {
             Log::error('Error updating transit point: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);

@@ -1,4 +1,5 @@
 @extends('layouts.dashboard')
+@section('title', 'Detail Pengiriman')
 
 @section('content')
     <div class="container mx-auto px-6 py-8">
@@ -234,7 +235,7 @@
                                                                     d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
-                                                            {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
+                                                            {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }} ({{  $transit['transit_point']['cargo_type'] ?? '-' }})
                                                         </span>
                                                     </p>
                                                     <div class="flex flex-wrap gap-2 text-xs text-gray-500">
@@ -447,7 +448,7 @@
                                                 {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }}
                                                 -
                                                 {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
-                                                ({{ $transit['transit_point']['type_cargo'] ?? '-' }})
+                                                ({{ $transit['transit_point']['cargo_type'] ?? '-' }})
                                             </span>
                                             <span class="font-semibold text-gray-900">Rp
                                                 {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}</span>

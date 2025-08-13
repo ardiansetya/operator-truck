@@ -1,4 +1,6 @@
 @extends('layouts.dashboard')
+@section('title', 'Pengiriman')
+
 @section('content')
     <div class="container mx-auto px-6 py-8">
         <!-- Header Section -->
