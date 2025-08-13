@@ -41,14 +41,25 @@ class CityController extends BaseApiController
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'latitude' => 'required|numeric',
+            'latitude' =>  'required|numeric',
             'longitude' => 'required|numeric',
             'country' => 'required|string|max:255',
         ]);
 
+        $payload = [
+            'name' => $validated['name'],
+            'latitude' => (float) $validated['latitude'],
+            'longitude' =>(float)  $validated['longitude'],
+            'country' => $validated['country'],
+        ];
+
+        Log::info('Creating city', $payload);
+
+        $url = $request->input('redirect_to');
+
         try {
-            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $validated);
-            return redirect()->route('cities.index')->with('success', 'Kota berhasil ditambahkan');
+            $response = $this->getAuthenticatedHttpClient()->post($this->endpoint, $payload);
+            return redirect($url)->with('success', 'Kota berhasil dibuat');
         } catch (\Exception $e) {
             Log::error('Error creating city: ' . $e->getMessage());
             return back()->withErrors(['message' => 'Terjadi kesalahan sistem']);

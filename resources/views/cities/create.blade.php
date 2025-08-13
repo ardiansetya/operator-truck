@@ -31,7 +31,7 @@
             <!-- Form Content -->
             <form method="POST" action="{{ route('cities.store') }}" class="p-8">
                 @csrf
-                
+                  <input type="hidden" name="redirect_to" value="{{ url()->previous() }}">
                 <div class="space-y-6">
                     <!-- City Name Field -->
                     <div class="group">
