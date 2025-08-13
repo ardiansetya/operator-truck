@@ -14,6 +14,14 @@
                         <div class="text-sm font-medium">Total Pengiriman</div>
                         <div class="text-2xl font-bold">{{ count($deliveries) }}</div>
                     </div>
+                    {{-- @if (count($deliveries) > 0)
+                        <div class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 rounded-xl shadow-lg">
+                            <div class="text-sm font-medium">Total Pendapatan</div>
+                            <div class="text-2xl font-bold">
+                                Rp {{ number_format(collect($deliveries)->sum('total_price'), 0, ',', '.') }}
+                            </div>
+                        </div>
+                    @endif --}}
                 </div>
             </div>
         </div>
@@ -59,8 +67,6 @@
             </div>
         @endif
 
-
-
         <!-- Cards Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             @forelse ($deliveries as $index => $delivery)
@@ -76,10 +82,11 @@
                                 </div>
                                 <div>
                                     <h3 class="text-lg font-semibold text-gray-800">
-                                        {{ $delivery['truck_license_plate'] ?? 'Unknown' }}</h3>
+                                        {{ $delivery['truck_license_plate'] ?? 'Unknown' }}
+                                    </h3>
                                     <p class="text-sm text-gray-500">Plat Nomor</p>
                                     <div>
-                                        <p class="text-gray-500 text-sm font-semibold ">
+                                        <p class="text-gray-500 text-sm font-semibold">
                                             @if ($delivery['finished_at'])
                                                 @php
                                                     $timestamp = $delivery['finished_at'];
@@ -90,7 +97,7 @@
                                                     $date->setTimestamp($timestamp);
                                                     $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
                                                 @endphp
-                                               Tanggal Selesai: {{ $date->format('d/m/Y H:i:s') }}
+                                                Tanggal Selesai: {{ $date->format('d/m/Y H:i:s') }}
                                             @else
                                                 Belum selesai
                                             @endif
@@ -98,11 +105,17 @@
                                     </div>
                                 </div>
                             </div>
-                            <span
-                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $delivery['finished_at'] ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
-                                {{ $delivery['finished_at'] ? 'Selesai' : 'Aktif' }}
-                            </span>
-
+                            <div class="flex flex-col items-end space-y-2">
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $delivery['finished_at'] ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' }}">
+                                    {{ $delivery['finished_at'] ? 'Selesai' : 'Aktif' }}
+                                </span>
+                                {{-- @if ($delivery['transit_count'] > 0)
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                        {{ $delivery['transit_count'] }} Transit
+                                    </span>
+                                @endif --}}
+                            </div>
                         </div>
                     </div>
 
@@ -117,14 +130,54 @@
                                 </div>
                                 <div class="flex-1">
                                     <div class="text-sm font-medium text-gray-800 mb-1">
-                                        {{ $delivery['start_city_name'] ?? 'Unknown' }}</div>
+                                        {{ $delivery['start_city_name'] ?? 'Unknown' }}
+                                    </div>
                                     <div class="text-xs text-gray-500 mb-3">Kota Asal</div>
                                     <div class="text-sm font-medium text-gray-800 mb-1">
-                                        {{ $delivery['end_city_name'] ?? 'Unknown' }}</div>
+                                        {{ $delivery['end_city_name'] ?? 'Unknown' }}
+                                    </div>
                                     <div class="text-xs text-gray-500">Kota Tujuan</div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Transit Points -->
+                        @if (count($delivery['transits'] ?? []) > 0)
+                            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                        </path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Titik Transit
+                                </h4>
+                                <div class="space-y-2 max-h-24 overflow-y-auto">
+                                    @foreach ($delivery['transits'] as $transit)
+                                        @if ($transit['transit_point'])
+                                            <div class="flex items-center justify-between text-xs">
+                                                <div class="flex items-center space-x-2">
+                                                    <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                                    <span class="text-gray-700">
+                                                        {{ $transit['transit_point']['loading_city']['name'] ?? 'Unknown' }}
+                                                        →
+                                                        {{ $transit['transit_point']['unloading_city']['name'] ?? 'Unknown' }}
+                                                    </span>
+                                                </div>
+                                                @if ($transit['transit_point']['extra_cost'] > 0)
+                                                    <span class="text-green-600 font-medium">
+                                                        +Rp
+                                                        {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Details Grid -->
@@ -136,7 +189,8 @@
                             </div>
                             <div class="text-center">
                                 <div class="text-2xl font-bold text-purple-600">
-                                    {{ $delivery['estimated_duration_hours'] ?? 0 }}</div>
+                                    {{ $delivery['estimated_duration_hours'] ?? 0 }}
+                                </div>
                                 <div class="text-xs text-gray-500">jam</div>
                             </div>
                         </div>
@@ -151,10 +205,85 @@
                                 <span
                                     class="font-medium text-gray-800">{{ $delivery['add_by_operator_name'] ?? 'N/A' }}</span>
                             </div>
-                            <div class="flex justify-between text-sm pt-2 border-t border-gray-200">
-                                <span class="text-gray-600">Harga:</span>
-                                <span class="font-bold text-green-600 text-lg">Rp
-                                    {{ number_format($delivery['base_price'] ?? 0, 0, ',', '.') }}</span>
+
+                            <!-- Price Breakdown -->
+                            @php
+                                $base_price = $delivery['base_price'] ?? 0;
+
+                                // Hitung total extra cost dari semua transit yang diterima
+                                $total_extra_cost = 0;
+                                $accepted_transits = [];
+
+                                if (!empty($delivery['transits'])) {
+                                    foreach ($delivery['transits'] as $transit) {
+                                        // Cek apakah transit diterima
+                                        if (!empty($transit['is_accepted']) && $transit['is_accepted'] === true) {
+                                            $extra_cost = $transit['transit_point']['extra_cost'] ?? 0;
+                                            $total_extra_cost += $extra_cost;
+                                            $accepted_transits[] = [
+                                                'loading_city' =>
+                                                    $transit['transit_point']['loading_city']['name'] ?? 'Unknown',
+                                                'unloading_city' =>
+                                                    $transit['transit_point']['unloading_city']['name'] ?? 'Unknown',
+                                                'cargo_type' => $transit['transit_point']['cargo_type'] ?? '-',
+                                                'extra_cost' => $extra_cost,
+                                            ];
+                                        }
+                                    }
+                                }
+
+                                $total_price = $base_price + $total_extra_cost;
+                            @endphp
+                            <div class="pt-2 border-t border-gray-200">
+                                <!-- Base Price -->
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-gray-600">Harga Dasar:</span>
+                                    <span class="font-medium text-gray-800">
+                                        Rp {{ number_format($base_price, 0, ',', '.') }}
+                                    </span>
+                                </div>
+
+                                <!-- Transit Routes & Costs -->
+                                @if (!empty($accepted_transits))
+                                    <div class="mb-3">
+                                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Biaya
+                                            Transit:</h5>
+                                        @foreach ($accepted_transits as $index => $transit)
+                                            <div
+                                                class="flex justify-between items-start py-1.5 {{ $index < count($accepted_transits) - 1 ? 'border-b border-gray-100' : '' }}">
+                                                <div class="flex-1 pr-2">
+                                                    <div class="text-xs font-medium text-gray-700">
+                                                        {{ $transit['loading_city'] }} → {{ $transit['unloading_city'] }}
+                                                    </div>
+                                                    @if ($transit['cargo_type'] && $transit['cargo_type'] !== '-')
+                                                        <div class="text-xs text-gray-500 mt-0.5">
+                                                            Jenis Muatan: {{ $transit['cargo_type'] }}
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <span class="text-xs font-semibold text-blue-600 whitespace-nowrap">
+                                                    +Rp {{ number_format($transit['extra_cost'], 0, ',', '.') }}
+                                                </span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    <!-- Subtotal Extra Cost -->
+                                    <div class="flex justify-between text-sm mb-2 py-1 bg-blue-50 px-2 rounded">
+                                        <span class="text-blue-700 font-medium">Total Biaya Transit:</span>
+                                        <span class="font-semibold text-blue-700">
+                                            Rp {{ number_format($total_extra_cost, 0, ',', '.') }}
+                                        </span>
+                                    </div>
+                                @endif
+
+                                <!-- Total Price -->
+                                <div class="flex justify-between text-sm pt-2 border-t border-gray-300">
+                                    <span class="text-gray-700 font-bold">TOTAL HARGA:</span>
+                                    <span class="font-bold text-green-600 text-base">
+                                        Rp {{ number_format($total_price, 0, ',', '.') }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -162,7 +291,8 @@
                         <div class="flex flex-col space-y-2">
                             <a href="{{ route('deliveries.show', $delivery['id']) }}"
                                 class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 px-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 text-center font-medium transform hover:scale-105">
-                                <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="inline w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -224,7 +354,7 @@
                         </div>
                         <h3 class="text-xl font-semibold text-gray-600 mb-2">Tidak Ada Data Pengiriman</h3>
                         <p class="text-gray-500 mb-6">Belum ada riwayat pengiriman yang tercatat dalam sistem</p>
-                        <a href="#"
+                        <a href="{{ route('deliveries.create') }}"
                             class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -237,56 +367,106 @@
             @endforelse
         </div>
 
-    </div>
 
-    <!-- Custom CSS for animations -->
-    <style>
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+
+        <!-- Custom CSS for animations -->
+        <style>
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            .card-enter {
+                animation: fadeInUp 0.5s ease-out;
             }
-        }
 
-        .card-enter {
-            animation: fadeInUp 0.5s ease-out;
-        }
+            .hover-lift:hover {
+                transform: translateY(-4px);
+            }
 
-        .hover-lift:hover {
-            transform: translateY(-4px);
-        }
-    </style>
+            /* Custom scrollbar for transit list */
+            .overflow-y-auto::-webkit-scrollbar {
+                width: 4px;
+            }
 
-    <script>
-        // Add some interactivity
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add loading animation to cards
-            const cards = document.querySelectorAll('.bg-white.rounded-2xl');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
-                card.classList.add('card-enter');
-            });
+            .overflow-y-auto::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 2px;
+            }
 
-            // Add search functionality
-            const searchInput = document.querySelector('input[type="text"]');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const searchTerm = e.target.value.toLowerCase();
-                    cards.forEach(card => {
-                        const plateNumber = card.querySelector('h3').textContent.toLowerCase();
-                        if (plateNumber.includes(searchTerm)) {
-                            card.style.display = 'block';
-                        } else {
-                            card.style.display = 'none';
-                        }
+            .overflow-y-auto::-webkit-scrollbar-thumb {
+                background: #c1c1c1;
+                border-radius: 2px;
+            }
+
+            .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
+        </style>
+
+        <script>
+            // Add some interactivity
+            document.addEventListener('DOMContentLoaded', function() {
+                // Add loading animation to cards
+                const cards = document.querySelectorAll('.bg-white.rounded-2xl');
+                cards.forEach((card, index) => {
+                    card.style.animationDelay = `${index * 0.1}s`;
+                    card.classList.add('card-enter');
+                });
+
+                // Add search functionality
+                const searchInput = document.querySelector('input[type="text"]');
+                if (searchInput) {
+                    searchInput.addEventListener('input', function(e) {
+                        const searchTerm = e.target.value.toLowerCase();
+                        cards.forEach(card => {
+                            const plateNumber = card.querySelector('h3').textContent.toLowerCase();
+                            const driverName = card.querySelector('.text-gray-800').textContent
+                                .toLowerCase();
+                            if (plateNumber.includes(searchTerm) || driverName.includes(searchTerm)) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    });
+                }
+
+                // Add tooltip functionality for transit points
+                const transitElements = document.querySelectorAll('[data-tooltip]');
+                transitElements.forEach(element => {
+                    element.addEventListener('mouseenter', function() {
+                        // Add tooltip logic here if needed
                     });
                 });
+
+                // Auto-refresh data every 30 seconds for active deliveries
+                const hasActiveDeliveries =
+                    {{ collect($deliveries)->where('finished_at', null)->count() > 0 ? 'true' : 'false' }};
+                if (hasActiveDeliveries) {
+                    setInterval(() => {
+                        // Only refresh if user is still on the page
+                        if (document.visibilityState === 'visible') {
+                            window.location.reload();
+                        }
+                    }, 30000); // 30 seconds
+                }
+            });
+
+            // Function to format currency
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('id-ID', {
+                    style: 'currency',
+                    currency: 'IDR',
+                    minimumFractionDigits: 0
+                }).format(amount);
             }
-        });
-    </script>
-@endsection
+        </script>
+    @endsection
