@@ -10,7 +10,7 @@
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">Profil Pengguna</h1>
                     <p class="text-gray-600">Kelola informasi akun dan keamanan Anda</p>
                 </div>
-                <div class="flex items-center space-x-3">
+                {{-- <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold text-lg shadow-lg">
                         {{ substr($profile['username'] ?? 'U', 0, 1) }}
                     </div>
@@ -18,7 +18,7 @@
                         <p class="font-medium text-gray-900">{{ $profile['username'] ?? 'Unknown User' }}</p>
                         <p class="text-sm text-gray-500">{{ $profile['role'] ?? 'User' }}</p>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
 
