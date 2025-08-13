@@ -90,6 +90,7 @@
                                 {{ $message }}
                             </span>
                         @enderror
+                          <p class="text-sm mt-2 text-gray-500">Belum ada kota mulai? <a href="{{ route('cities.create') }}" class="text-blue-500">Tambahkan Kota</a> </p>
                     </div>
 
                     <!-- End City -->
@@ -118,7 +119,9 @@
                                 {{ $message }}
                             </span>
                         @enderror
+                          <p class="text-sm mt-2 text-gray-500">Belum ada kota tujuan? <a href="{{ route('cities.create') }}" class="text-blue-500">Tambahkan Kota</a> </p>
                     </div>
+                      
 
                     <!-- cargo_type -->
                     <div class="md:col-span-2">
