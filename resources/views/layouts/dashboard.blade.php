@@ -46,53 +46,52 @@
 
                     </nav>
                 </div>
-                <div class="flex items-center space-x-4">
-                    {{-- Profile Link --}}
-                    <a href="{{ route('profile.show') }}"
-                        class="flex items-center space-x-3 text-gray-600 hover:text-blue-600 py-3 px-4 rounded-lg transition duration-200 ease-in-out group {{ Route::is('profile.*') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'hover:bg-gray-50' }}"
-                        title="Profile">
+              <div class="flex items-center gap-4">
+    {{-- Profile Link --}}
+    <a href="{{ route('profile.show') }}"
+        class="flex items-center gap-3 px-4 py-3 rounded-lg transition duration-200 ease-in-out group
+            {{ Route::is('profile.*') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'hover:bg-gray-50 text-gray-600 hover:text-blue-600' }}"
+        title="Profile">
 
-                        {{-- Profile Icon --}}
-                        <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 transition-colors duration-200"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a8.25 8.25 0 0115 0" />
-                            </svg>
-                        </div>
+        {{-- Profile Icon --}}
+        <div
+            class="w-9 h-9 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full text-white flex items-center justify-center font-semibold text-lg shadow-sm">
+            {{ substr($currentUser['username'] ?? 'U', 0, 1) }}
+        </div>
 
-                        {{-- User Info --}}
-                        @if (isset($currentUser))
-                            <div class="flex-1 min-w-0">
-                                <p
-                                    class="text-sm font-medium truncate group-hover:text-blue-600 transition-colors duration-200">
-                                    {{ $currentUser['username'] }}
-                                </p>
-                                <p class="text-xs text-gray-500 truncate capitalize">
-                                    {{ $currentUser['role'] }}
-                                </p>
-                            </div>
-                        @endif
+        {{-- User Info --}}
+        @if (isset($currentUser))
+            <div class="flex flex-col min-w-0">
+                <p class="text-sm font-medium truncate group-hover:text-blue-600">
+                    {{ $currentUser['username'] }}
+                </p>
+                <p class="text-xs text-gray-500 truncate capitalize">
+                    {{ $currentUser['role'] }}
+                </p>
+            </div>
+        @endif
 
-                        {{-- Optional: Arrow indicator for active state --}}
-                        <div
-                            class="flex-shrink-0 {{ Route::is('profile.*') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' }} transition-opacity duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
-                    </a>
-                    <form action="{{ route('logout') }}" method="POST">
+        {{-- Arrow indicator --}}
+        <div
+            class="ml-auto flex-shrink-0 transition-opacity duration-200
+                {{ Route::is('profile.*') ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' }}">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </div>
+    </a>
 
-                        @csrf
-                        <button
-                            class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 ease-in-out transform hover:-translate-y-0.5">
-                            Logout
-                        </button>
-                    </form>
-                </div>
+    {{-- Logout Button --}}
+    <form action="{{ route('logout') }}" method="POST" class="flex-shrink-0">
+        @csrf
+        <button
+            class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg shadow-sm transition duration-200 ease-in-out hover:bg-red-700 hover:shadow-md transform hover:-translate-y-0.5">
+            Logout
+        </button>
+    </form>
+</div>
+
             </div>
         </header>
 
