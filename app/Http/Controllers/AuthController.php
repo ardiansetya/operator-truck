@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -12,12 +13,13 @@ class AuthController extends Controller
 
     public function __construct()
     {
-        $this->javaBackend = env('JAVA_BACKEND_URL', 'http://localhost:8080');
+        $this->javaBackend = config('services.java_backend.url');
     }
 
     public function login(Request $request)
     {
         $response = Http::post("{$this->javaBackend}/auth/login", $request->all());
+        Log::info($response->json('data'));
 
         if ($response->successful()) {
             $data = $response->json('data');
