@@ -147,7 +147,7 @@
                         </svg>
                         Detail Rute
                     </h3>
-                    <p class="text-gray-700 leading-relaxed">{{ $route['cargo_type'] }}</p>
+                    <p class="text-gray-700 leading-relaxed">Jenis Muatan: {{ $route['cargo_type'] }}</p>
                 </div>
                 @endif
             </div>
