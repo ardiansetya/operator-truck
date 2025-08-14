@@ -93,7 +93,6 @@ class RouteController extends BaseApiController
                 'end_city_id' => 'required|integer',
                 'cargo_type' => 'nullable|string|max:255',
                 'base_price' => 'required|numeric|gt:0',
-                'cargo_type' => 'required|string|max:255',
                 'is_active' => 'required|boolean',
             ]);
 
@@ -102,7 +101,6 @@ class RouteController extends BaseApiController
                 'end_city_id' => (int) $validated['end_city_id'],
                 'cargo_type' => $validated['cargo_type'],
                 'base_price' => (float) $validated['base_price'],
-                'cargo_type' => $validated['cargo_type'],
                 'is_active' => (bool) $validated['is_active'],
             ]);
 
