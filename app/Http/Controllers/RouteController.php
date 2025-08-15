@@ -13,7 +13,7 @@ class RouteController extends BaseApiController
         $this->endpoint = $this->baseUrl ? $this->baseUrl . '/api/routes' : '';
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             if (empty($this->baseUrl)) {
@@ -49,6 +49,20 @@ class RouteController extends BaseApiController
             if (empty($routes)) {
                 Log::warning('API returned empty data for routes', ['response' => $routesResponse->body()]);
             }
+
+            // 🔍 Filtering by name di sini
+            if ($request->filled('search')) {
+                // Ambil keyword lalu normalisasi
+                $search = strtolower($request->input('search'));
+                $search = str_replace('-', '→', $search); // ganti "-" jadi panah
+
+                $routes = array_filter($routes, function ($route) use ($search) {
+                    return strpos(strtolower($route['start_city_name'] ?? ''), $search) !== false
+                        || strpos(strtolower($route['end_city_name'] ?? ''), $search) !== false
+                        || strpos(strtolower($route['cargo_type'] ?? ''), $search) !== false;
+                });
+            }
+
 
             return view('routes.index', compact('routes'));
         } catch (\Exception $e) {

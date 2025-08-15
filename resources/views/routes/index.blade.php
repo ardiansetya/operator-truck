@@ -95,6 +95,28 @@
             </div>
         @endif
 
+        <!-- Search Form -->
+<form method="GET" action="{{ route('routes.index') }}" class="mb-6 flex items-center space-x-2">
+    <input 
+        type="text" 
+        name="search" 
+        value="{{ request('search') }}" 
+        placeholder="Cari rute..." 
+        class="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500"
+    >
+    <button 
+        type="submit" 
+        class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+        Cari
+    </button>
+    @if(request('search'))
+        <a href="{{ route('routes.index') }}" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+            Reset
+        </a>
+    @endif
+</form>
+
+
         <!-- Routes Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             @forelse ($routes as $route)
@@ -107,7 +129,7 @@
                             <div class="text-white">
                                 <h3 class="text-lg font-bold">
                                     {{ $route['start_city_name'] ?? 'Kota Awal #' . $route['start_city_id'] }}
-                                    →
+                                -
                                     {{ $route['end_city_name'] ?? 'Kota Tujuan #' . $route['end_city_id'] }}</h3>
                                 {{-- <p class="text-sm opacity-90">
                                    Rute #{{ $route['id'] }} 
@@ -225,7 +247,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
                                 </path>
                             </svg>
-                            <span>Tambah Rute Pertama</span>
+                            <span>Tambah Rute</span>
                         </a>
                     </div>
                 </div>

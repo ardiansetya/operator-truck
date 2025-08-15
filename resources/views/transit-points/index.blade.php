@@ -19,7 +19,7 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Transit Points</h1>
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">Rute Transit</h1>
                         <p class="text-gray-600">Kelola titik transit untuk optimasi rute pengiriman</p>
                     </div>
                 </div>
@@ -31,10 +31,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
-                        <span>Tambah Transit Point</span>
+                        <span>Tambah Rute Transit</span>
                     </a>
                     <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl shadow-lg">
-                        <div class="text-sm font-medium">Total Transit</div>
+                        <div class="text-sm font-medium">Total Rute Transit</div>
                         <div class="text-2xl font-bold">{{ count($transitPoints) }}</div>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                 <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
                     <!-- Transit Aktif -->
                     <div class="bg-gradient-to-br from-emerald-400 via-teal-500 to-teal-600 p-6 rounded-2xl text-white shadow-lg transform hover:scale-[1.02] transition-all duration-200">
-                        <div class="text-base font-semibold opacity-90">Transit Aktif</div>
+                        <div class="text-base font-semibold opacity-90">Rute Transit Aktif</div>
                         <div class="text-4xl font-extrabold mt-2">
                             {{ collect($transitPoints)->where('is_active', 1)->count() }}
                         </div>
@@ -84,7 +84,7 @@
 
                     <!-- Transit Non-Aktif -->
                     <div class="bg-gradient-to-br from-rose-400 via-pink-500 to-pink-600 p-6 rounded-2xl text-white shadow-lg transform hover:scale-[1.02] transition-all duration-200">
-                        <div class="text-base font-semibold opacity-90">Transit Non-Aktif</div>
+                        <div class="text-base font-semibold opacity-90">Rute Transit Non-Aktif</div>
                         <div class="text-4xl font-extrabold mt-2">
                             {{ collect($transitPoints)->where('is_active', 0)->count() }}
                         </div>
