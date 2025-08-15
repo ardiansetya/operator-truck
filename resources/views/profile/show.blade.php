@@ -7,7 +7,7 @@
         <div class="mb-8">
             <div class="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Profil Pengguna</h1>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Profil Admin </h1>
                     <p class="text-gray-600">Kelola informasi akun dan keamanan Anda</p>
                 </div>
                 {{-- <div class="flex items-center space-x-3">
