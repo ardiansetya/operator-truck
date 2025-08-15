@@ -13,33 +13,48 @@ class TransitPointController extends BaseApiController
         $this->endpoint = $this->baseUrl ? $this->baseUrl . '/api/transit-points' : '';
     }
 
-    public function index()
+    public function index(Request $request)
     {
         try {
             if (empty($this->baseUrl)) {
-                return view('transit-points.index', ['transitPoints' => [], 'error' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.']);
+                return view('transit-points.index', [
+                    'transitPoints' => [],
+                    'error' => 'API base URL configuration is missing. Please set JAVA_BACKEND_URL in your .env file.'
+                ]);
             }
 
             // Fetch transit points
             $transitResponse = $this->makeRequest('get', $this->endpoint);
             if ($transitResponse instanceof \Illuminate\Http\RedirectResponse) {
-                return $transitResponse; // Redirect to login if token refresh failed
+                return $transitResponse;
             }
             if (!$transitResponse->successful()) {
-                Log::error('API request failed for transit points', ['status' => $transitResponse->status(), 'body' => $transitResponse->body()]);
-                return view('transit-points.index', ['transitPoints' => [], 'error' => 'Gagal memuat data transit point: ' . $transitResponse->json('error', $transitResponse->json('message', 'Kesalahan server'))]);
+                Log::error('API request failed for transit points', [
+                    'status' => $transitResponse->status(),
+                    'body' => $transitResponse->body()
+                ]);
+                return view('transit-points.index', [
+                    'transitPoints' => [],
+                    'error' => 'Gagal memuat data transit point: ' . $transitResponse->json('error', $transitResponse->json('message', 'Kesalahan server'))
+                ]);
             }
             $transitPoints = $transitResponse->json('data') ?? [];
-            log::debug('Transit point data:', $transitPoints);
+            Log::debug('Transit point data:', $transitPoints);
 
             // Fetch cities
             $citiesResponse = $this->makeRequest('get', $this->baseUrl . '/api/cities');
             if ($citiesResponse instanceof \Illuminate\Http\RedirectResponse) {
-                return $citiesResponse; // Redirect to login if token refresh failed
+                return $citiesResponse;
             }
             if (!$citiesResponse->successful()) {
-                Log::error('API request failed for cities', ['status' => $citiesResponse->status(), 'body' => $citiesResponse->body()]);
-                return view('transit-points.index', ['transitPoints' => $transitPoints, 'error' => 'Gagal memuat data kota, menampilkan ID kota']);
+                Log::error('API request failed for cities', [
+                    'status' => $citiesResponse->status(),
+                    'body' => $citiesResponse->body()
+                ]);
+                return view('transit-points.index', [
+                    'transitPoints' => $transitPoints,
+                    'error' => 'Gagal memuat data kota, menampilkan ID kota'
+                ]);
             }
             $cities = collect($citiesResponse->json('data') ?? [])->keyBy('id');
 
@@ -49,16 +64,50 @@ class TransitPointController extends BaseApiController
                 $transitPoint['unloading_city_name'] = $cities->get($transitPoint['unloading_city_id'], ['name' => 'Unknown'])['name'];
             }
 
+            // 🔍 Filtering by search query
+            // 🔍 Filtering untuk Transit Points berdasarkan dua input
+            if ($request->filled('start_city') || $request->filled('end_city')) {
+                $wantStart = strtolower(trim($request->input('start_city', '')));
+                $wantEnd   = strtolower(trim($request->input('end_city', '')));
+
+                // helper normalisasi string
+                $normalize = function ($v) {
+                    $v = strtolower((string) $v);
+                    $v = preg_replace('/\s+/', ' ', $v ?? '');
+                    return trim($v);
+                };
+
+                $transitPoints = array_values(array_filter($transitPoints, function ($point) use ($wantStart, $wantEnd, $normalize) {
+                    // ambil nama kota loading & unloading
+                    $startName = $normalize($point['loading_city_name'] ?? '');
+                    $endName   = $normalize($point['unloading_city_name'] ?? '');
+
+                    $okStart = $wantStart === '' || str_contains($startName, $wantStart);
+                    $okEnd   = $wantEnd   === '' || str_contains($endName,   $wantEnd);
+
+                    return $okStart && $okEnd;
+                }));
+            }
+
+
             if (empty($transitPoints)) {
-                Log::warning('API returned empty data for transit points', ['response' => $transitResponse->body()]);
+                Log::warning('API returned empty data for transit points', [
+                    'response' => $transitResponse->body()
+                ]);
             }
 
             return view('transit-points.index', compact('transitPoints'));
         } catch (\Exception $e) {
-            Log::error('Error fetching transit points: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return view('transit-points.index', ['transitPoints' => [], 'error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()]);
+            Log::error('Error fetching transit points: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return view('transit-points.index', [
+                'transitPoints' => [],
+                'error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()
+            ]);
         }
     }
+
 
     public function create()
     {
