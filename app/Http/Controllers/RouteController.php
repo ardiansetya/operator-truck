@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 
 class RouteController extends BaseApiController
 {
@@ -51,17 +52,40 @@ class RouteController extends BaseApiController
             }
 
             // 🔍 Filtering by name di sini
-            if ($request->filled('search')) {
-                // Ambil keyword lalu normalisasi
-                $search = strtolower($request->input('search'));
-                $search = str_replace('-', '→', $search); // ganti "-" jadi panah
+            // 🔎 Filtering by start & end city (tanpa DB, data dari API)
+            if ($request->filled('start_city') || $request->filled('end_city')) {
+                $wantStart = strtolower(trim($request->input('start_city', '')));
+                $wantEnd   = strtolower(trim($request->input('end_city', '')));
 
-                $routes = array_filter($routes, function ($route) use ($search) {
-                    return strpos(strtolower($route['start_city_name'] ?? ''), $search) !== false
-                        || strpos(strtolower($route['end_city_name'] ?? ''), $search) !== false
-                        || strpos(strtolower($route['cargo_type'] ?? ''), $search) !== false;
-                });
+                // helper normalisasi string: huruf kecil + rapikan spasi
+                $normalize = function ($v) {
+                    $v = strtolower((string) $v);
+                    $v = preg_replace('/\s+/', ' ', $v ?? '');
+                    return trim($v);
+                };
+
+                $routes = array_values(array_filter($routes, function ($route) use ($wantStart, $wantEnd, $normalize, $cities) {
+                    // ambil nama kota dari payload; kalau kosong coba mapping dari $cities (keyBy id)
+                    $startNameRaw = $route['start_city_name']
+                        ?? optional($cities->get($route['start_city_id']))['name']
+                        ?? '';
+                    $endNameRaw   = $route['end_city_name']
+                        ?? optional($cities->get($route['end_city_id']))['name']
+                        ?? '';
+
+                    $startName = $normalize($startNameRaw);
+                    $endName   = $normalize($endNameRaw);
+
+                    $okStart = $wantStart === '' || str_contains($startName, $wantStart);
+                    $okEnd   = $wantEnd   === '' || str_contains($endName,   $wantEnd);
+
+                    // dua input: jika keduanya diisi, keduanya harus match
+                    return $okStart && $okEnd;
+                }));
             }
+
+
+
 
 
             return view('routes.index', compact('routes'));
