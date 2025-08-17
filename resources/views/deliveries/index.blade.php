@@ -10,6 +10,16 @@
                 <p class="text-gray-600">Kelola dan pantau semua pengiriman</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 mt-4 lg:mt-0">
+                <a href="{{ route('deliveries.tracking') }}"
+                    class="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-purple-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Tracking Live
+                </a>
                 <a href="{{ route('deliveries.history') }}"
                     class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white px-6 py-3 rounded-xl hover:from-yellow-600 hover:to-yellow-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-lg flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,6 +265,19 @@
                             Detail
                         </a>
 
+                        @if (!$delivery['finished_at'])
+                            <a href="{{ route('deliveries.tracking', ['delivery_id' => $delivery['id']]) }}"
+                                class="flex items-center px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition duration-200 transform hover:scale-105 shadow-md">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Track
+                            </a>
+                        @endif
+
                         @if ($delivery['started_at'])
                             <form method="POST" action="{{ route('deliveries.finish', $delivery['id']) }}"
                                 class="inline" onsubmit="return confirm('Yakin ingin menyelesaikan pengiriman ini?')">
@@ -300,13 +323,6 @@
                 </div>
                 <h3 class="text-xl font-medium text-gray-800 mb-2">Belum Ada Pengiriman</h3>
                 <p class="text-gray-600 mb-6">Mulai dengan menambahkan pengiriman </p>
-                {{-- <a href="{{ route('deliveries.create') }}"
-                    class="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 transform hover:scale-105 shadow-lg">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Tambah Pengiriman
-                </a> --}}
             </div>
         @endforelse
     </div>

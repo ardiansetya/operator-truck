@@ -847,6 +847,10 @@ class DeliveryController extends BaseApiController
         }
     }
 
+    public function tracking(){
+        return view('deliveries.tracking');
+    }
+
    
 
 }

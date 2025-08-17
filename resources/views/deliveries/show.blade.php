@@ -204,14 +204,28 @@
                         {{-- Transit Points - Perbaikan Format Waktu --}}
                         @if (!empty($delivery['transits']))
                             <div class="bg-gray-50 rounded-xl p-4">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                                    <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                    Titik Transit ({{ count($delivery['transits']) }})
-                                </h3>
+                                <div class="flex justify-between items-center mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                        Titik Transit ({{ count($delivery['transits']) }})
+                                    </h3>
+
+                                    <!-- Tombol Tambah Transit -->
+                                    <a href="{{ route('transit-drivers.create') }}?delivery_id={{ $delivery['id'] }}"
+                                        class="inline-flex items-center bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out shadow-lg hover:shadow-xl">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                        Tambah Transit
+                                    </a>
+                                </div>
+
+
                                 <div class="space-y-3">
                                     @foreach ($delivery['transits'] as $transit)
                                         <div class="bg-white p-4 rounded-lg border">
@@ -234,7 +248,8 @@
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
                                                             {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
-                                                            ({{ $transit['transit_point']['cargo_type'] ?? '-' }}) </span>
+                                                            ({{ $transit['transit_point']['cargo_type'] ?? '-' }})
+                                                        </span>
                                                     </p>
                                                     <div class="flex flex-wrap gap-2 text-xs text-gray-500">
                                                         @if (isset($transit['transit_point']['estimated_duration_minute']) &&
@@ -249,7 +264,7 @@
                                                                     Biaya Extra: Rp
                                                                     {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}
                                                                 </span>
-                                                                @endif
+                                                            @endif
                                                     </div>
                                                 </div>
                                                 @if (is_null($transit['reason']))
@@ -261,7 +276,7 @@
                                                         class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $transit['is_accepted'] ?? false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                         {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Ditolak' }}
                                                     </span>
-                                                    @endif
+                                                @endif
                                             </div>
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                                                 @if ($transit['arrived_at'])
@@ -290,7 +305,7 @@
                                                             @endphp
                                                                 {{ $date->format('d/m/Y H:i:s') }} </p>
                                                         </div>
-                                                        @endif
+                                                    @endif
                                             </div>
                                             @if ($transit['reason'])
                                                 <div class="mt-2 p-2 bg-gray-50 rounded text-xs"> <span
@@ -321,7 +336,7 @@
                                 <h3 class="text-xl font-medium text-gray-800 mb-2">Belum Ada Transit</h3>
                                 <p class="text-gray-600 mb-6">Mulai dengan menambahkan titik transit pertama</p>
 
-                                <a href="{{ route('transit-drivers.create', $delivery['id'])}}"
+                                <a href="{{ route('transit-drivers.create', $delivery['id']) }}"
                                     class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
