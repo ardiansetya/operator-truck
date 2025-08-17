@@ -217,26 +217,24 @@
                                         <div class="bg-white p-4 rounded-lg border">
                                             <div class="flex justify-between items-start mb-3">
                                                 <div class="flex-1">
-                                                    <p class="text-sm font-medium text-gray-800 mb-1">
-                                                        <span class="inline-flex items-center">
-                                                            <svg class="w-4 h-4 mr-1 text-green-600" fill="currentColor"
+                                                    <p class="text-sm font-medium text-gray-800 mb-1"> <span
+                                                            class="inline-flex items-center"> <svg
+                                                                class="w-4 h-4 mr-1 text-green-600" fill="currentColor"
                                                                 viewBox="0 0 20 20">
                                                                 <path fill-rule="evenodd"
                                                                     d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
                                                             {{ $transit['transit_point']['loading_city']['name'] ?? 'Tidak Diketahui' }}
-                                                        </span>
-                                                        →
-                                                        <span class="inline-flex items-center">
-                                                            <svg class="w-4 h-4 mr-1 text-red-600" fill="currentColor"
+                                                        </span> → <span class="inline-flex items-center"> <svg
+                                                                class="w-4 h-4 mr-1 text-red-600" fill="currentColor"
                                                                 viewBox="0 0 20 20">
                                                                 <path fill-rule="evenodd"
                                                                     d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
                                                                     clip-rule="evenodd"></path>
                                                             </svg>
-                                                            {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }} ({{  $transit['transit_point']['cargo_type'] ?? '-' }})
-                                                        </span>
+                                                            {{ $transit['transit_point']['unloading_city']['name'] ?? 'Tidak Diketahui' }}
+                                                            ({{ $transit['transit_point']['cargo_type'] ?? '-' }}) </span>
                                                     </p>
                                                     <div class="flex flex-wrap gap-2 text-xs text-gray-500">
                                                         @if (isset($transit['transit_point']['estimated_duration_minute']) &&
@@ -244,54 +242,44 @@
                                                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded">
                                                                 Estimasi:
                                                                 {{ $transit['transit_point']['estimated_duration_minute'] }}
-                                                                menit
-                                                            </span>
-                                                        @endif
-                                                        @if (isset($transit['transit_point']['extra_cost']) && $transit['transit_point']['extra_cost'] > 0)
-                                                            <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                                                                Biaya Extra: Rp
-                                                                {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}
-                                                            </span>
-                                                        @endif
+                                                                menit </span>
+                                                            @endif @if (isset($transit['transit_point']['extra_cost']) && $transit['transit_point']['extra_cost'] > 0)
+                                                                <span
+                                                                    class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                                                                    Biaya Extra: Rp
+                                                                    {{ number_format($transit['transit_point']['extra_cost'], 0, ',', '.') }}
+                                                                </span>
+                                                                @endif
                                                     </div>
                                                 </div>
                                                 @if (is_null($transit['reason']))
                                                     <span
                                                         class="inline-flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                                        Menunggu
-                                                    </span>
+                                                        Menunggu </span>
                                                 @else
                                                     <span
                                                         class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $transit['is_accepted'] ?? false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                                         {{ $transit['is_accepted'] ?? false ? 'Diterima' : 'Ditolak' }}
                                                     </span>
-                                                @endif
+                                                    @endif
                                             </div>
-
                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                                                 @if ($transit['arrived_at'])
-                                                    <div>
-                                                        <span class="font-medium text-gray-600">Waktu Tiba:</span>
-                                                        <p class="text-gray-800">
-                                                            @php
-                                                                $timestamp = $transit['arrived_at'];
-                                                                if ($timestamp > 9999999999) {
-                                                                    $timestamp = $timestamp / 1000;
-                                                                }
-                                                                $date = new DateTime();
-                                                                $date->setTimestamp($timestamp);
-                                                                $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
-                                                            @endphp
-                                                            {{ $date->format('d/m/Y H:i:s') }}
-                                                        </p>
+                                                    <div> <span class="font-medium text-gray-600">Waktu Tiba:</span>
+                                                        <p class="text-gray-800"> @php
+                                                            $timestamp = $transit['arrived_at'];
+                                                            if ($timestamp > 9999999999) {
+                                                                $timestamp = $timestamp / 1000;
+                                                            }
+                                                            $date = new DateTime();
+                                                            $date->setTimestamp($timestamp);
+                                                            $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                                        @endphp
+                                                            {{ $date->format('d/m/Y H:i:s') }} </p>
                                                     </div>
-                                                @endif
-
-                                                @if ($transit['actioned_at'])
-                                                    <div>
-                                                        <span class="font-medium text-gray-600">Waktu Aksi:</span>
-                                                        <p class="text-gray-800">
-                                                            @php
+                                                    @endif @if ($transit['actioned_at'])
+                                                        <div> <span class="font-medium text-gray-600">Waktu Aksi:</span>
+                                                            <p class="text-gray-800"> @php
                                                                 $timestamp = $transit['actioned_at'];
                                                                 if ($timestamp > 9999999999) {
                                                                     $timestamp = $timestamp / 1000;
@@ -300,30 +288,50 @@
                                                                 $date->setTimestamp($timestamp);
                                                                 $date->setTimezone(new DateTimeZone('Asia/Jakarta'));
                                                             @endphp
-                                                            {{ $date->format('d/m/Y H:i:s') }}
-                                                        </p>
-                                                    </div>
-                                                @endif
+                                                                {{ $date->format('d/m/Y H:i:s') }} </p>
+                                                        </div>
+                                                        @endif
                                             </div>
-
                                             @if ($transit['reason'])
-                                                <div class="mt-2 p-2 bg-gray-50 rounded text-xs">
-                                                    <span class="font-medium text-gray-600">Pesan:</span>
+                                                <div class="mt-2 p-2 bg-gray-50 rounded text-xs"> <span
+                                                        class="font-medium text-gray-600">Pesan:</span>
                                                     <p class="text-gray-700 mt-1">{{ $transit['reason'] }}</p>
                                                 </div>
-                                            @endif
-
-                                            @if ($transit['action_by_name'] !== 'N/A')
-                                                <div class="mt-2 text-xs text-gray-500">
-                                                    <span class="font-medium">Diproses oleh:</span>
-                                                    {{ $transit['action_by_name'] }}
-                                                </div>
-                                            @endif
+                                                @endif @if ($transit['action_by_name'] !== 'N/A')
+                                                    <div class="mt-2 text-xs text-gray-500"> <span
+                                                            class="font-medium">Diproses oleh:</span>
+                                                        {{ $transit['action_by_name'] }} </div>
+                                                @endif
                                         </div>
                                     @endforeach
                                 </div>
                             </div>
+                        @else
+                            <!-- Empty State -->
+                            <div class="col-span-full text-center py-16">
+                                <div
+                                    class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-medium text-gray-800 mb-2">Belum Ada Transit</h3>
+                                <p class="text-gray-600 mb-6">Mulai dengan menambahkan titik transit pertama</p>
+
+                                <a href="{{ route('transit-drivers.create', $delivery['id'])}}"
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Tambah Transit
+                                </a>
+                            </div>
                         @endif
+
 
                         {{-- Alerts - Perbaikan Format Waktu --}}
                         @if (!empty($delivery['alerts']))
@@ -436,7 +444,10 @@
                                 @endphp
 
                                 <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span class="text-sm text-gray-600">{{ $delivery['start_city_name'] ?? 'Tidak Diketahui' }} - {{ $delivery['end_city_name'] ?? 'Tidak Diketahui' }} ({{ $delivery['cargo_type'] ?? 'Tidak Diketahui' }})</span>
+                                    <span
+                                        class="text-sm text-gray-600">{{ $delivery['start_city_name'] ?? 'Tidak Diketahui' }}
+                                        - {{ $delivery['end_city_name'] ?? 'Tidak Diketahui' }}
+                                        ({{ $delivery['cargo_type'] ?? 'Tidak Diketahui' }})</span>
                                     <span class="font-semibold text-gray-900">Rp
                                         {{ number_format($base_price, 0, ',', '.') }}</span>
                                 </div>

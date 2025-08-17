@@ -13,7 +13,7 @@ class AuthTokenWithRefresh
 
     public function __construct()
     {
-        $this->javaBackend = env('JAVA_BACKEND_URL', 'http://localhost:8080');
+        $this->javaBackend = config('services.java_backend.url', 'http://localhost:8080');
     }
 
     public function handle(Request $request, Closure $next)

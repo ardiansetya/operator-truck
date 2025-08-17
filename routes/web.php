@@ -83,11 +83,14 @@ Route::middleware(['auth.token.refresh', 'role:ADMIN'])->group(function () {
 
     // Transit Driver
     Route::get('/transit-drivers', [TransitDriverController::class, 'index'])->name('transit-drivers.index');
-    Route::patch(
-        '/transit-drivers/accept-or-reject',
-        [TransitDriverController::class, 'acceptOrReject']
-    )
+    Route::get('/transit-drivers/create', [TransitDriverController::class, 'create'])->name('transit-drivers.create'); 
+    Route::post('/transit-drivers', [TransitDriverController::class, 'store'])->name('transit-drivers.store');
+    Route::patch('/transit-drivers/accept-or-reject', [TransitDriverController::class, 'acceptOrReject'])
         ->name('transit-drivers.accept-or-reject');
+
+    // AJAX endpoint untuk mendapatkan transit points berdasarkan delivery  
+    Route::get('/api/transit-points-by-delivery', [TransitDriverController::class, 'getTransitPointsByDelivery'])
+        ->name('transit-drivers.transit-points-by-delivery');
 });
 
 Route::get('/debug-token', function () {

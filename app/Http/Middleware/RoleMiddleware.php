@@ -14,7 +14,7 @@ class RoleMiddleware
 
     public function __construct()
     {
-        $this->baseUrl = env('JAVA_BACKEND_URL', 'http://localhost:8080');
+        $this->baseUrl = config('services.java_backend.url', 'http://localhost:8080');
     }
 
     public function handle(Request $request, Closure $next, ...$roles)
