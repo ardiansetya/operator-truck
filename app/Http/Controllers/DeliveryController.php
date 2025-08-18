@@ -847,8 +847,112 @@ class DeliveryController extends BaseApiController
         }
     }
 
-    public function tracking(){
-        return view('deliveries.tracking');
+    public function tracking()
+    {
+        try {
+            $data = $this->getActiveDeliveriesWithPositions();
+            return view('deliveries.tracking', [
+                'initialData' => json_encode($data->getData()->data),
+                'status' => 'success'
+            ]);
+        } catch (\Exception $e) {
+            return view('deliveries.tracking', [
+                'initialData' => json_encode([]),
+                'status' => 'error',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getActiveDeliveriesWithPositions()
+    {
+        try {
+            if (empty($this->baseUrl)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Konfigurasi server tidak lengkap'
+                ], 500);
+            }
+
+            // Ambil data deliveries aktif
+            $response = $this->makeRequest('GET', "{$this->endpoint}/active");
+            if ($response instanceof \Illuminate\Http\RedirectResponse || !$response->successful()) {
+                throw new \Exception('Failed to fetch active deliveries');
+            }
+
+            $deliveries = $response->json('data') ?? [];
+            $result = [];
+
+            foreach ($deliveries as $delivery) {
+                // Ambil detail posisi terakhir untuk setiap delivery
+                $positionResponse = $this->makeRequest('GET', "{$this->endpoint}/positions/{$delivery['id']}");
+                $positions = $positionResponse->successful() ? $positionResponse->json('data') : [];
+
+                // Ambil posisi terbaru (elemen pertama array)
+                $latestPosition = $positions[0] ?? null;
+
+                if (!$latestPosition) continue;
+
+                // Ambil info worker dan truck
+                $workerResponse = $this->makeRequest('GET', $this->baseUrl . "/api/users/{$delivery['worker_id']}");
+                $worker = $workerResponse->successful() ? $workerResponse->json('data') : null;
+
+                $truckResponse = $this->makeRequest('GET', $this->baseUrl . "/api/trucks/{$delivery['truck_id']}");
+                $truck = $truckResponse->successful() ? $truckResponse->json('data') : null;
+
+                $routeResponse = $this->makeRequest('GET', $this->baseUrl . "/api/routes/{$delivery['route_id']}");
+                $route = $routeResponse->successful() ? $routeResponse->json('data') : null;
+
+                $result[] = [
+                    'id' => $delivery['id'],
+                    'deliveryId' => $delivery['id'],
+                    'workerId' => $delivery['worker_id'],
+                    'truckId' => $delivery['truck_id'],
+                    'routeId' => $delivery['route_id'],
+                    'driverName' => $worker['username'] ?? 'Unknown Driver',
+                    'plateNumber' => $truck['license_plate'] ?? 'Unknown Plate',
+                    'model' => $truck['model'] ?? 'Unknown Model',
+                    'latitude' => $latestPosition['latitude'],
+                    'longitude' => $latestPosition['longitude'],
+                    'lastUpdate' => $latestPosition['recorded_at'], // Perhatikan case sensitivity
+                    'speed' => $latestPosition['speed'] ?? rand(20, 80), // Default speed jika tidak ada
+                    'deliveryInfo' => [
+                        'startCity' => $route['start_city_name'] ?? 'Unknown',
+                        'endCity' => $route['end_city_name'] ?? 'Unknown',
+                        'cargoType' => $route['cargo_type'] ?? ($truck['cargo_type'] ?? 'Unknown'),
+                        'distanceKM' => $route['distance_km'] ?? 0,
+                        'estimatedDurationHours' => $route['estimated_duration_hours'] ?? 0
+                    ],
+                    'worker' => $worker,
+                    'truck' => $truck,
+                    'route' => $route,
+                    'startedAt' => $delivery['started_at'],
+                    'positions' => $positions // Sertakan semua posisi jika diperlukan
+                ];
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $result
+            ]);
+
+            // 2. Jika ingin return view (untuk web):
+            // return view('deliveries.tracking', [
+            //     'deliveries' => $result,
+            //     'status' => 'success'
+            // ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting active deliveries with positions: ' . $e->getMessage());
+
+            // Pilih salah satu return berikut sesuai kebutuhan:
+
+            // 2. Jika ingin return view (untuk web):
+            // 1. Jika ingin return JSON (untuk API):
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
    
