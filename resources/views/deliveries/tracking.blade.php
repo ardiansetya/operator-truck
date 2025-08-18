@@ -244,7 +244,7 @@
             // Ganti dengan API key Geoapify Anda
             GEOAPIFY_API_KEY: 'YOUR_GEOAPIFY_API_KEY',
             // URL backend Spring Boot Anda
-            BACKEND_URL: '{{ config("service.java.backend_url", "http://localhost:8080/api") }}',
+            BACKEND_URL: '{{ config("services.java_backend.url", "http://localhost:8080/api") }}',
             // Interval update posisi (ms)
             UPDATE_INTERVAL: 15000, // 15 detik
             // Delivery ID jika ada (untuk tracking spesifik)

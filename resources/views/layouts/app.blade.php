@@ -21,7 +21,7 @@
 
      <link rel="icon" href="{{ asset('favicon.ico') }}">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
 
     <div class="w-full max-w-md p-6 bg-white rounded-xl shadow-md">
         @yield('content')

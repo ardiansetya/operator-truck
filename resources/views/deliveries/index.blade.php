@@ -264,7 +264,7 @@
                             </svg>
                             Detail
                         </a>
-
+{{-- 
                         @if (!$delivery['finished_at'])
                             <a href="{{ route('deliveries.tracking', ['delivery_id' => $delivery['id']]) }}"
                                 class="flex items-center px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition duration-200 transform hover:scale-105 shadow-md">
@@ -276,7 +276,7 @@
                                 </svg>
                                 Track
                             </a>
-                        @endif
+                        @endif --}}
 
                         @if ($delivery['started_at'])
                             <form method="POST" action="{{ route('deliveries.finish', $delivery['id']) }}"
