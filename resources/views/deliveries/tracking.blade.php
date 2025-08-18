@@ -1,6 +1,16 @@
 @extends('layouts.dashboard')
 @section('title', 'Live Tracking Truck')
 
+@section('css')
+   <!-- Include Leaflet CSS -->
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    
+@endsection
+
+
+
 @section('content')
     <div class="container mx-auto px-6 py-8">
         <!-- Header Section -->
@@ -137,7 +147,7 @@
                 <!-- Map Container -->
                 <div class="flex-1 relative">
                     <!-- Map Controls -->
-                    <div class="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+                    {{-- <div class="absolute top-4 right-4 flex flex-col space-y-2">
                         <button onclick="fitAllTrucks()" 
                             class="bg-white text-gray-700 p-2 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 hover:bg-gray-50">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +162,7 @@
                                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                         </button>
-                    </div>
+                    </div> --}}
 
                     <!-- Status indicator -->
                     <div class="absolute top-4 left-4 z-10">
@@ -165,11 +175,11 @@
                     </div>
 
                     <!-- Map -->
-                    <div id="map" class="h-full w-full bg-gray-100">
+                    <div id="map" class="h-full w-full ">
                         <div class="flex items-center justify-center h-full">
                             <div class="text-center">
-                                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
-                                <p class="text-gray-600">Memuat peta...</p>
+                                {{-- <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                                <p class="text-gray-600">Memuat peta...</p> --}}
                             </div>
                         </div>
                     </div>
@@ -177,7 +187,7 @@
             </div>
         </div>
 
-        <!-- Legend -->
+        {{-- <!-- Legend -->
         <div class="mt-6 bg-white rounded-xl shadow-lg border border-gray-100 p-6">
             <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                 <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,17 +226,19 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
-    <!-- Include Leaflet CSS dan JS -->
-   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
+
+   
+@endsection
+
+@push('js')
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
-    <script>
+
+      <script>
         // Configuration - sesuaikan dengan backend Spring Boot Anda
         const CONFIG = {
             // Ganti dengan API key Geoapify Anda
@@ -250,11 +262,10 @@
             // Menggunakan Geoapify tiles
             map = L.map('map').setView([-6.2088, 106.8456], 10); // Jakarta sebagai center default
 
-            // Geoapify tile layer
-            L.tileLayer(`https://maps.geoapify.com/v1/tile/osm-bright/{z}/{x}/{y}.png?apiKey=${CONFIG.GEOAPIFY_API_KEY}`, {
-                maxZoom: 18,
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+         const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
 
             // Load initial truck data
             loadTrucks();
@@ -270,7 +281,7 @@
         async function loadTrucks() {
             showLoading(true);
             try {
-                let url = `${CONFIG.BACKEND_URL}/trucks/positions`;
+                let url = `${CONFIG.BACKEND_URL}/delivery/positions/latest`;
                 if (CONFIG.DELIVERY_ID) {
                     url += `?delivery_id=${CONFIG.DELIVERY_ID}`;
                 }
@@ -645,4 +656,5 @@
             }
         });
     </script>
-@endsection
+    
+@endpush
