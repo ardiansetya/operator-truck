@@ -14,6 +14,21 @@ class DeliveryController extends BaseApiController
         parent::__construct();
         $this->endpoint = $this->baseUrl ? $this->baseUrl . '/api/delivery' : '';
     }
+
+    // Helper method untuk mendapatkan nama operator
+    // private function getOperatorName($operatorId)
+    // {
+    //     try {
+    //         $operatorResponse = $this->makeRequest('GET', $this->baseUrl . "/api/operators/{$operatorId}");
+    //         if ($operatorResponse->successful()) {
+    //             $operator = $operatorResponse->json('data');
+    //             return $operator['name'] ?? $operator['username'] ?? 'Unknown Operator';
+    //         }
+    //         return 'Unknown Operator';
+    //     } catch (\Exception $e) {
+    //         return 'Unknown Operator';
+    //     }
+    // }
       private function clearDeliveryRelatedCaches()
     {
         $cacheKeys = [
@@ -850,14 +865,21 @@ class DeliveryController extends BaseApiController
     public function tracking()
     {
         try {
-            $data = $this->getActiveDeliveriesWithPositions();
+            $response = $this->getActiveDeliveriesWithPositions();
+
+            // Use getData(true) to get an associative array
+            $responseData = $response->getData(true);
+
+            // Safely get the data, defaulting to an empty array if not found
+            $truckData = $responseData['data'] ?? [];
+
             return view('deliveries.tracking', [
-                'initialData' => json_encode($data->getData()->data),
+                'initialData' => $truckData,
                 'status' => 'success'
             ]);
         } catch (\Exception $e) {
             return view('deliveries.tracking', [
-                'initialData' => json_encode([]),
+                'initialData' => [],
                 'status' => 'error',
                 'error' => $e->getMessage()
             ]);
@@ -884,16 +906,14 @@ class DeliveryController extends BaseApiController
             $result = [];
 
             foreach ($deliveries as $delivery) {
-                // Ambil detail posisi terakhir untuk setiap delivery
+                // Ambil detail posisi terakhir
                 $positionResponse = $this->makeRequest('GET', "{$this->endpoint}/positions/{$delivery['id']}");
                 $positions = $positionResponse->successful() ? $positionResponse->json('data') : [];
 
-                // Ambil posisi terbaru (elemen pertama array)
                 $latestPosition = $positions[0] ?? null;
-
                 if (!$latestPosition) continue;
 
-                // Ambil info worker dan truck
+                // Worker & truck
                 $workerResponse = $this->makeRequest('GET', $this->baseUrl . "/api/users/{$delivery['worker_id']}");
                 $worker = $workerResponse->successful() ? $workerResponse->json('data') : null;
 
@@ -901,53 +921,118 @@ class DeliveryController extends BaseApiController
                 $truck = $truckResponse->successful() ? $truckResponse->json('data') : null;
 
                 $routeResponse = $this->makeRequest('GET', $this->baseUrl . "/api/routes/{$delivery['route_id']}");
-                $route = $routeResponse->successful() ? $routeResponse->json('data') : null;
+                $baseRoute = $routeResponse->successful() ? $routeResponse->json('data') : null;
 
+                // Route & delivery detail (ada transits)
+                $deliveryDetail = $this->makeRequest('GET', $this->baseUrl . "/api/delivery/detail/{$delivery['id']}");
+                $route = $deliveryDetail->successful() ? $deliveryDetail->json('data') : null;
+
+                // 🚚 Ambil semua city yang dibutuhkan dari transits
+                $transitCities = collect();
+                if ($route && isset($route['transits'])) {
+                    foreach ($route['transits'] as $transit) {
+                        $tp = $transit['transit_point'] ?? [];
+                        foreach (['loading_city_id', 'unloading_city_id'] as $cityKey) {
+                            $cityId = $tp[$cityKey] ?? null;
+                            if ($cityId && !$transitCities->has($cityId)) {
+                                $cityResp = $this->makeRequest('GET', $this->baseUrl . "/api/cities/{$cityId}");
+                                if ($cityResp->successful()) {
+                                    $transitCities->put($cityId, $cityResp->json('data'));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 🎯 Mapping transits ke bentuk rapih
+                $transits = [];
+                if ($route && isset($route['transits'])) {
+                    $transits = array_map(function ($transit) use ($transitCities) {
+                        $tp = $transit['transit_point'] ?? [];
+
+                        $loadingCity = $transitCities->get($tp['loading_city_id'] ?? null, [
+                            'id' => null,
+                            'name' => 'Unknown'
+                        ]);
+                        $unloadingCity = $transitCities->get($tp['unloading_city_id'] ?? null, [
+                            'id' => null,
+                            'name' => 'Unknown'
+                        ]);
+
+                        return [
+                            'id' => $transit['id'] ?? null,
+                            'transit_point' => [
+                                'id' => $tp['id'] ?? null,
+                                'loading_city' => [
+                                    'id' => $loadingCity['id'] ?? null,
+                                    'name' => $loadingCity['name'] ?? 'Unknown',
+                                    'latitude' => $loadingCity['latitude'] ?? null,
+                                    'longitude' => $loadingCity['longitude'] ?? null,
+                                    'country' => $loadingCity['country'] ?? null,
+                                ],
+                                'unloading_city' => [
+                                    'id' => $unloadingCity['id'] ?? null,
+                                    'name' => $unloadingCity['name'] ?? 'Unknown',
+                                    'latitude' => $unloadingCity['latitude'] ?? null,
+                                    'longitude' => $unloadingCity['longitude'] ?? null,
+                                    'country' => $unloadingCity['country'] ?? null,
+                                ],
+                                'estimated_duration_minute' => $tp['estimated_duration_minute'] ?? null,
+                                'extra_cost' => $tp['extra_cost'] ?? null,
+                                'cargo_type' => $tp['cargo_type'] ?? null,
+                                'is_active' => $tp['is_active'] ?? false,
+                            ],
+                            'arrived_at' => $transit['arrived_at'] ?? null,
+                            'is_accepted' => $transit['is_accepted'] ?? false,
+                            'actioned_at' => $transit['actioned_at'] ?? null,
+                            'reason' => $transit['reason'] ?? null,
+                            'action_by_operator_id' => $transit['action_by_operator_id'] ?? null,
+                            'action_by_name' => isset($transit['action_by_operator_id']) && $transit['action_by_operator_id']
+                                ? $this->getOperatorName($transit['action_by_operator_id'])
+                                : null,
+                        ];
+                    }, $route['transits']);
+                }
+
+                // 🚛 Masukkan ke result utama
                 $result[] = [
                     'id' => $delivery['id'],
-                    'deliveryId' => $delivery['id'],
-                    'workerId' => $delivery['worker_id'],
-                    'truckId' => $delivery['truck_id'],
-                    'routeId' => $delivery['route_id'],
-                    'driverName' => $worker['username'] ?? 'Unknown Driver',
-                    'plateNumber' => $truck['license_plate'] ?? 'Unknown Plate',
+                    'delivery_id' => $delivery['id'],
+                    'worker_id' => $delivery['worker_id'],
+                    'truck_id' => $delivery['truck_id'],
+                    'route_id' => $delivery['route_id'],
+                    'driver_name' => $worker['username'] ?? 'Unknown Driver',
+                    'plate_number' => $truck['license_plate'] ?? 'Unknown Plate',
                     'model' => $truck['model'] ?? 'Unknown Model',
-                    'latitude' => $latestPosition['latitude'],
-                    'longitude' => $latestPosition['longitude'],
-                    'lastUpdate' => $latestPosition['recorded_at'], // Perhatikan case sensitivity
-                    'speed' => $latestPosition['speed'] ?? rand(20, 80), // Default speed jika tidak ada
-                    'deliveryInfo' => [
-                        'startCity' => $route['start_city_name'] ?? 'Unknown',
-                        'endCity' => $route['end_city_name'] ?? 'Unknown',
-                        'cargoType' => $route['cargo_type'] ?? ($truck['cargo_type'] ?? 'Unknown'),
-                        'distanceKM' => $route['distance_km'] ?? 0,
-                        'estimatedDurationHours' => $route['estimated_duration_hours'] ?? 0
+                    'latitude' => (float) $latestPosition['latitude'],
+                    'longitude' => (float) $latestPosition['longitude'],
+                    'last_update' => $latestPosition['recorded_at'],
+                    'speed' => $latestPosition['speed'] ?? rand(20, 80),
+                    'delivery_info' => [
+                        'start_city' => $baseRoute['start_city_name'] ?? 'Unknown',
+                        'end_city' => $baseRoute['end_city_name'] ?? 'Unknown',
+                        'cargo_type' => $baseRoute['cargo_type'] ?? 'Unknown',
+                        'distance_km' => $baseRoute['distance_km'] ?? 0,
+                        'estimated_duration_hours' => $baseRoute['estimated_duration_hours'] ?? 0
                     ],
+                    'transits' => $transits,
                     'worker' => $worker,
                     'truck' => $truck,
                     'route' => $route,
-                    'startedAt' => $delivery['started_at'],
-                    'positions' => $positions // Sertakan semua posisi jika diperlukan
+                    'started_at' => $delivery['started_at'],
+                    'positions' => $positions
                 ];
             }
+
+            Log::info('result', ['result' => $result]);
 
             return response()->json([
                 'status' => 'success',
                 'data' => $result
             ]);
-
-            // 2. Jika ingin return view (untuk web):
-            // return view('deliveries.tracking', [
-            //     'deliveries' => $result,
-            //     'status' => 'success'
-            // ]);
         } catch (\Exception $e) {
             Log::error('Error getting active deliveries with positions: ' . $e->getMessage());
 
-            // Pilih salah satu return berikut sesuai kebutuhan:
-
-            // 2. Jika ingin return view (untuk web):
-            // 1. Jika ingin return JSON (untuk API):
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
@@ -956,5 +1041,4 @@ class DeliveryController extends BaseApiController
     }
 
    
-
 }

@@ -101,7 +101,7 @@
 
         <!-- Map and Sidebar Container -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
-            <div class="flex flex-col lg:flex-row h-screen max-h-[600px]">
+            <div class="flex flex-col lg:flex-row h-screen max-h-[700px]">
                 <!-- Sidebar -->
                 <div class="lg:w-1/3 bg-gray-50 border-r border-gray-200 overflow-y-auto">
                     <div class="p-6">
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Map Container -->
-                <div class="flex-1 relative">
+                <div class="flex-1 relative z-0">
                     <!-- Status indicator -->
                     <div class="absolute top-4 left-4 z-10">
                         <div class="bg-white rounded-lg shadow-md border border-gray-200 px-3 py-2">
@@ -158,13 +158,34 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Transit Details Modal -->
+<div id="transitModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[1050] flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+                <div class="p-6 border-b border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-semibold text-gray-800" id="modalTitle">Detail Transit Truck</h3>
+                        <button onclick="closeTransitModal()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="modalContent" class="p-6">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
     </div>
 @endsection
 
+
+
 @push('js')
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
 
 <script>
     // Inisialisasi peta
@@ -178,135 +199,84 @@
     const INITIAL_DATA = @json($initialData ?? []);
 
     // Initialize map
-   // Initialize map
-function initMap() {
-    map = L.map('map').setView([-6.2088, 106.8456], 5); // Default center (Indonesia)
+    function initMap() {
+        map = L.map('map').setView([-2.5489, 118.0149], 5); // Center of Indonesia
 
-    const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
+        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
 
-    // Load initial data
-    if (INITIAL_DATA && INITIAL_DATA.length > 0) {
-        updateTruckData(INITIAL_DATA);
-        updateTruckList();
-        updateMap();
-        updateStatistics();
-        updateStatus('connected', 'Terhubung dengan data awal');
-        fitAllTrucks();
-    } else {
-        loadTrucks(); // Fallback ke API jika tidak ada data awal
+        if (INITIAL_DATA && INITIAL_DATA.length > 0) {
+            updateTruckData(INITIAL_DATA);
+            updateTruckList();
+            updateMap();
+            updateStatistics();
+            updateStatus('connected', 'Terhubung dengan data awal');
+            fitAllTrucks();
+        } else {
+            loadTrucks();
+        }
+        
+        // Aktifkan auto-refresh jika diinginkan
+        // updateInterval = setInterval(refreshTrucks, 15000); // Refresh setiap 15 detik
     }
     
-    // Set up auto-refresh
-    // updateInterval = setInterval(refreshTrucks, 15000); // Refresh setiap 15 detik
-}
-    
+    // Fungsi untuk memuat data truck dari API
+    async function loadTrucks() {
+        showLoading(true);
+        updateStatus('connecting', 'Mengambil data truck...');
+        
+        try {
+            const response = await fetch('/api/deliveries/tracking', {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
 
-// Fungsi untuk memuat data truck dari API
-async function loadTrucks() {
-    showLoading(true);
-    updateStatus('connecting', 'Mengambil data truck...');
-    
-    try {
-        const response = await fetch('/api/deliveries/tracking', {
-            headers: {
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
-        });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+            const result = await response.json();
+            
+            if (result.status !== 'success') {
+                throw new Error(result.message || 'Failed to load truck data');
+            }
 
-        const result = await response.json();
-        
-        if (result.status !== 'success') {
-            throw new Error(result.message || 'Failed to load truck data');
+            const trucksData = result.data || [];
+            
+            updateTruckData(trucksData);
+            updateTruckList();
+            updateMap();
+            updateStatistics();
+            updateStatus('connected', `Berhasil memuat ${trucksData.length} truck aktif`);
+            
+        } catch (error) {
+            console.error('Error loading trucks:', error);
+            updateStatus('error', 'Error memuat data');
+            
+            if (Object.keys(truckData).length === 0) {
+                showEmptyState();
+            }
         }
-
-        // Fix: Extract the data array from the response
-        const trucksData = result.data || [];
         
-        updateTruckData(trucksData);
-        updateTruckList();
-        updateMap();
-        updateStatistics();
-        updateStatus('connected', `Berhasil memuat ${trucksData.length} truck aktif`);
-        
-    } catch (error) {
-        console.error('Error loading trucks:', error);
-        updateStatus('error', 'Error memuat data');
-        
-        // Jika gagal dan tidak ada data awal, tampilkan pesan error
-        if (INITIAL_DATA.length === 0) {
-            showEmptyState();
-        }
+        showLoading(false);
     }
-    
-    showLoading(false);
-}
 
     // Fungsi untuk memperbarui data truck
-function updateTruckData(trucks) {
-    console.log('updateTruckData called with:', trucks);
-    console.log('Type of trucks:', typeof trucks);
-    console.log('Array.isArray(trucks):', Array.isArray(trucks));
-    console.log('Has forEach method:', trucks && typeof trucks.forEach === 'function');
-    
-    // Initialize empty object
-    truckData = {};
-    
-    // Handle different data formats
-    let trucksArray = [];
-    
-    if (Array.isArray(trucks)) {
-        trucksArray = trucks;
-    } else if (trucks && typeof trucks === 'object' && trucks.length !== undefined) {
-        // Handle array-like objects
-        trucksArray = Array.prototype.slice.call(trucks);
-    } else if (trucks && typeof trucks === 'object' && trucks.data && Array.isArray(trucks.data)) {
-        // Handle API response format {status: "success", data: [...]}
-        trucksArray = trucks.data;
-    } else if (trucks && typeof trucks === 'string') {
-        // Handle JSON string
-        try {
-            const parsed = JSON.parse(trucks);
-            trucksArray = Array.isArray(parsed) ? parsed : (parsed.data || []);
-        } catch (e) {
-            console.error('Error parsing trucks JSON:', e);
-            trucksArray = [];
-        }
-    } else {
-        console.error('Unable to process trucks data:', trucks);
-        trucksArray = [];
-    }
-    
-    console.log('Final trucksArray:', trucksArray);
-    console.log('trucksArray.length:', trucksArray.length);
-    
-    // Process each truck
-    trucksArray.forEach((truck, index) => {
-        console.log(`Processing truck ${index}:`, truck);
+    function updateTruckData(trucks) {
+        truckData = {};
+        let trucksArray = Array.isArray(trucks) ? trucks : [];
         
-        // Handle timestamp conversion - your API returns Unix timestamp
-        const lastUpdateTime = truck.lastUpdate ? 
-            (truck.lastUpdate > 9999999999 ? 
-                new Date(truck.lastUpdate) : 
-                new Date(truck.lastUpdate * 1000)) : 
-            new Date();
-            
-        truckData[truck.id] = {
-            ...truck,
-            lastUpdateTime: lastUpdateTime
-        };
-    });
-    
-    console.log('Final truckData:', truckData);
-}
-// Fungsi untuk memperbarui daftar truck di sidebar
+        trucksArray.forEach((truck) => {
+            const lastUpdateTime = truck.last_update ? new Date(truck.last_update * 1000) : new Date();
+            truckData[truck.id] = { ...truck, lastUpdateTime: lastUpdateTime };
+        });
+    }
+
+    // Fungsi untuk memperbarui daftar truck di sidebar
     function updateTruckList() {
         const truckList = document.getElementById('truckList');
         const truckCount = document.getElementById('truckCount');
@@ -327,28 +297,57 @@ function updateTruckData(trucks) {
         loadingState.classList.add('hidden');
         emptyState.classList.add('hidden');
         truckCount.textContent = `${trucks.length} truck`;
-
         truckList.innerHTML = '';
 
         trucks.forEach(truck => {
             const timeDiff = Date.now() - truck.lastUpdateTime.getTime();
-            let status = 'online';
-            let statusColor = 'green';
-            let statusText = 'Online';
-
-            if (timeDiff >= 900000) { // 15 menit
-                status = 'offline';
-                statusColor = 'red';
-                statusText = 'Offline';
-            } else if (timeDiff >= 300000) { // 5 menit
-                status = 'delayed';
-                statusColor = 'yellow';
-                statusText = 'Delayed';
-            }
+            let status = 'online', statusColor = 'green', statusText = 'Online';
+            if (timeDiff >= 900000) { status = 'offline'; statusColor = 'red'; statusText = 'Offline'; } 
+            else if (timeDiff >= 300000) { status = 'delayed'; statusColor = 'yellow'; statusText = 'Delayed'; }
 
             const truckItem = document.createElement('div');
             truckItem.className = `truck-item p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow cursor-pointer ${selectedTruckId === truck.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`;
             truckItem.onclick = () => selectTruck(truck.id);
+
+            let baseRouteHtml = '';
+            if (truck.delivery_info) {
+                baseRouteHtml = `
+                    <div class="pt-2 border-t border-gray-100">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-500">Rute Dasar:</span>
+                            <span class="font-medium text-gray-700 truncate">${truck.delivery_info.start_city} → ${truck.delivery_info.end_city}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let transitsHtml = '';
+            if (truck.transits && truck.transits.length > 0) {
+                const activeTransits = truck.transits.filter(t => t.transit_point && t.transit_point.is_active);
+                if (activeTransits.length > 0) {
+                    transitsHtml = `
+                        <div class="pt-2 border-t border-gray-100">
+                            <div class="flex items-center justify-between text-xs mb-2">
+                                <span class="text-gray-500">Rute Transit:</span>
+                                <button onclick="event.stopPropagation(); showTransitDetails('${truck.id}')" class="text-blue-600 hover:text-blue-800 font-semibold">
+                                    Lihat Detail
+                                </button>
+                            </div>
+                            <div class="space-y-1">
+                                ${activeTransits.slice(0, 1).map((transit) => `
+                                    <div class="flex items-center text-xs">
+                                        <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                                        <span class="text-gray-600">${transit.transit_point.loading_city?.name || '...'} → ${transit.transit_point.unloading_city?.name || '...'}  (${transit.transit_point.cargo_type || '...'})</span>
+                                        ${transit.is_accepted ? '<span class="ml-2 text-green-600">✓</span>' : '<span class="ml-2 text-yellow-600">⏳</span>'}
+                                    </div>
+                                `).join('')}
+                                ${activeTransits.length > 1 ? `<div class="text-xs text-gray-500 pl-4">+${activeTransits.length - 1} transit lainnya</div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            // --- Akhir Perbaikan 1 ---
 
             truckItem.innerHTML = `
                 <div class="flex items-center justify-between mb-3">
@@ -357,9 +356,8 @@ function updateTruckData(trucks) {
                             🚛
                         </div>
                         <div>
-                            <h4 class="font-semibold text-gray-800">${truck.driverName}</h4>
-                            <p class="text-sm text-gray-600">${truck.plateNumber}</p>
-                            ${truck.model ? `<p class="text-xs text-gray-500">${truck.model}</p>` : ''}
+                            <h4 class="font-semibold text-gray-800">${truck.driver_name}</h4>
+                            <p class="text-sm text-gray-600">${truck.plate_number}</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
@@ -370,126 +368,176 @@ function updateTruckData(trucks) {
                 
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Update terakhir:</span>
-                        <span class="font-medium">${formatTime(truck.lastUpdateTime)}</span>
+                        <span class="text-gray-500">Update terakhir:</span>
+                        <span class="font-medium text-gray-700">${formatTime(truck.lastUpdateTime)}</span>
                     </div>
-                    ${truck.deliveryInfo ? `
-                    <div class="pt-2 border-t border-gray-100">
-                        <div class="flex items-center justify-between text-xs mb-1">
-                            <div class="flex items-center">
-                                <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-                                <span>${truck.deliveryInfo.startCity}</span>
-                            </div>
-                            <div class="w-8 border-b border-dashed border-gray-300"></div>
-                            <div class="flex items-center">
-                                <span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-                                <span>${truck.deliveryInfo.endCity}  (${truck.deliveryInfo.cargoType})</span>
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-500 space-y-1">
-                            ${truck.deliveryInfo.distanceKM ? `<p>Posisi Sekarang: ${truck.deliveryInfo.distanceKM} km</p>` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
+                    ${baseRouteHtml}
+                    ${transitsHtml}
                 </div>
             `;
-
             truckList.appendChild(truckItem);
         });
     }
 
     // Fungsi untuk memperbarui peta
     function updateMap() {
-        // Hapus marker yang ada
-        Object.values(truckMarkers).forEach(marker => {
-            map.removeLayer(marker);
-        });
+        Object.values(truckMarkers).forEach(marker => map.removeLayer(marker));
         truckMarkers = {};
 
-        // Tambahkan marker baru
         Object.values(truckData).forEach(truck => {
             if (!truck.latitude || !truck.longitude) return;
 
             const timeDiff = Date.now() - truck.lastUpdateTime.getTime();
-            let iconColor = '#4CAF50'; // green - online
-            let status = 'Online';
+            let iconColor = '#4CAF50'; let status = 'Online';
+            if (timeDiff >= 900000) { iconColor = '#f44336'; status = 'Offline'; } 
+            else if (timeDiff >= 300000) { iconColor = '#ff9800'; status = 'Delayed'; }
 
-            if (timeDiff >= 900000) { // 15 menit
-                iconColor = '#f44336'; // red - offline
-                status = 'Offline';
-            } else if (timeDiff >= 300000) { // 5 menit
-                iconColor = '#ff9800'; // yellow - delayed
-                status = 'Delayed';
+            const iconHtml = `<div style="background-color: ${iconColor}; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; ${selectedTruckId === truck.id ? 'transform: scale(1.3); border-color: #2196F3; border-width: 4px;' : ''}">🚛</div>`;
+            const customIcon = L.divIcon({ html: iconHtml, className: 'custom-truck-icon', iconSize: [34, 34], iconAnchor: [17, 17] });
+            const marker = L.marker([truck.latitude, truck.longitude], { icon: customIcon }).addTo(map);
+
+            // --- PERBAIKAN 2: Konten Popup Dibuat Lebih Lengkap dan Akurat ---
+            let routeInfoForPopup = '';
+            if (truck.delivery_info) {
+                routeInfoForPopup += `
+                    <div class="pt-2 border-t border-gray-200">
+                        <p><strong>Rute Dasar:</strong></p>
+                        <div class="text-xs mb-1">
+                            ${truck.delivery_info.start_city} → ${truck.delivery_info.end_city} ( ${truck.delivery_info.cargo_type})
+                        </div>
+                    </div>`;
             }
 
-            // Buat custom icon
-            const iconHtml = `
-                <div style="
-                    background-color: ${iconColor};
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 50%;
-                    border: 3px solid white;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-size: 14px;
-                    ${selectedTruckId === truck.id ? 'transform: scale(1.2); border-color: #2196F3; border-width: 4px;' : ''}
-                ">🚛</div>
-            `;
+            if (truck.transits && truck.transits.length > 0) {
+                const activeTransits = truck.transits.filter(t => t.transit_point && t.transit_point.is_active);
+                if (activeTransits.length > 0) {
+                    routeInfoForPopup += `
+                        <div class="pt-2 ${truck.delivery_info ? '' : 'border-t border-gray-200'}">
+                            <p><strong>Transit Aktif:</strong></p>
+                            ${activeTransits.map(transit => `
+                                <div class="text-xs mb-1">
+                                    • ${transit.transit_point.loading_city?.name || '...'} → ${transit.transit_point.unloading_city?.name || '...'} (${transit.transit_point.cargo_type || '...'})
+                                    ${transit.is_accepted ? ' <span style="color:green;">✓</span>' : ' <span style="color:orange;">⏳</span>'}
+                                </div>
+                            `).join('')}
+                        </div>`;
+                }
+            }
 
-            const customIcon = L.divIcon({
-                html: iconHtml,
-                className: 'custom-truck-icon',
-                iconSize: [34, 34],
-                iconAnchor: [17, 17]
-            });
-
-            const marker = L.marker([truck.latitude, truck.longitude], {
-                icon: customIcon
-            }).addTo(map);
-
-            // Popup info
             const popupContent = `
-                <div class="truck-popup p-2 max-w-xs">
-                    <h3 class="font-bold text-gray-800 mb-2">${truck.driverName}</h3>
+                <div class="truck-popup p-1 max-w-xs">
+                    <h3 class="font-bold text-gray-800 mb-2">${truck.driver_name}</h3>
                     <div class="space-y-1 text-sm">
-                        <p><strong>ID Delivery:</strong> ${truck.deliveryId}</p>
-                        <p><strong>Plat:</strong> ${truck.plateNumber}</p>
-                        ${truck.model ? `<p><strong>Model:</strong> ${truck.model}</p>` : ''}
+                        <p><strong>Plat:</strong> ${truck.plate_number}</p>
                         <p><strong>Status:</strong> <span class="font-medium" style="color: ${iconColor}">${status}</span></p>
+                        <p><strong>Kecepatan:</strong> ${truck.speed ?? 'N/A'} km/h</p>
                         <p><strong>Update:</strong> ${formatTime(truck.lastUpdateTime)}</p>
-                        <p><strong>Posisi:</strong> ${truck.latitude.toFixed(6)}, ${truck.longitude.toFixed(6)}</p>
-                        ${truck.deliveryInfo ? `
-                        <div class="pt-2 border-t border-gray-200">
-                            <p><strong>Rute:</strong> ${truck.deliveryInfo.startCity} → ${truck.deliveryInfo.endCity}</p>
-                            <p><strong>Muatan:</strong> ${truck.deliveryInfo.cargoType}</p>
-                           
-                        </div>
-                        ` : ''}
+                        <p><strong>Posisi:</strong> ${truck.latitude.toFixed(5)}, ${truck.longitude.toFixed(5)}</p>
+                        ${routeInfoForPopup}
                     </div>
                 </div>
             `;
+            // --- Akhir Perbaikan 2 ---
 
             marker.bindPopup(popupContent);
-            
             truckMarkers[truck.id] = marker;
-
-            // Click event
-            marker.on('click', () => {
-                selectTruck(truck.id);
-            });
+            marker.on('click', () => selectTruck(truck.id));
         });
 
-        // Sesuaikan view untuk menampilkan semua truck
         if (Object.keys(truckMarkers).length > 0 && !selectedTruckId) {
             fitAllTrucks();
         }
     }
 
-    // Fungsi untuk memilih truck
+    // Fungsi untuk menampilkan detail transit
+    function showTransitDetails(truckId) {
+        const truck = truckData[truckId];
+        if (!truck || !truck.transits || truck.transits.length === 0) return;
+        
+        const modal = document.getElementById('transitModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalTitle.textContent = `Detail Transit - ${truck.driver_name} (${truck.plate_number})`;
+        
+        let content = `
+            <div class="mb-6">
+                <h4 class="text-lg font-medium text-gray-800 mb-3">Informasi Truck</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div><strong>Driver:</strong> ${truck.driver_name}</div>
+                    <div><strong>Plat Nomor:</strong> ${truck.plate_number}</div>
+                    <div><strong>Model:</strong> ${truck.model || 'N/A'}</div>
+                    <div><strong>Status:</strong> <span class="px-2 py-1 rounded text-xs ${getStatusColor(truck)}">Online</span></div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h4 class="text-lg font-medium text-gray-800 mb-3">Daftar Transit</h4>
+                <div class="space-y-4">
+        `;
+        
+        truck.transits.forEach((transit, index) => {
+            const tp = transit.transit_point || {};
+            const loadingCity = tp.loading_city || {};
+            const unloadingCity = tp.unloading_city || {};
+            
+            const statusBadge = transit.is_accepted ? '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">✓ Diterima</span>' : '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">⏳ Pending</span>';
+            const arrivedAt = transit.arrived_at ? `<div class="text-sm text-gray-600 mt-2"><strong>Tiba:</strong> ${formatDateTime(transit.arrived_at * 1000)}</div>` : '';
+            const actionedAt = transit.actioned_at ? `<div class="text-sm text-gray-600"><strong>Diproses:</strong> ${formatDateTime(transit.actioned_at * 1000)}</div>` : '';
+            
+            content += `
+                <div class="border rounded-lg p-4 ${tp.is_active ? 'border-blue-300 bg-blue-50' : 'border-gray-200'}">
+                    <div class="flex justify-between items-start mb-3">
+                        <h5 class="font-medium text-gray-800">Transit ${index + 1}</h5>
+                        <div class="flex space-x-2">
+                            ${tp.is_active ? '<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Aktif</span>' : ''}
+                            ${statusBadge}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                        <div>
+                            <p class="font-medium text-gray-700">Kota Muat</p>
+                            <p class="font-semibold">${loadingCity.name || 'Unknown'}</p>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-700">Kota Bongkar</p>
+                            <p class="font-semibold">${unloadingCity.name || 'Unknown'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                        ${tp.cargo_type ? `<div><strong>Jenis Muatan:</strong> ${tp.cargo_type}</div>` : ''}
+                        ${tp.estimated_duration_minute ? `<div><strong>Est. Durasi:</strong> ${tp.estimated_duration_minute} menit</div>` : ''}
+                    </div>
+                    
+                    ${arrivedAt}
+                    ${actionedAt}
+                </div>
+            `;
+        });
+        
+        content += `</div></div>`;
+        
+        modalContent.innerHTML = content;
+        modal.classList.remove('hidden');
+    }
+    
+    function closeTransitModal() { document.getElementById('transitModal').classList.add('hidden'); }
+    
+    function getStatusColor(truck) {
+        const timeDiff = Date.now() - truck.lastUpdateTime.getTime();
+        if (timeDiff >= 900000) return 'bg-red-100 text-red-800';
+        if (timeDiff >= 300000) return 'bg-yellow-100 text-yellow-800';
+        return 'bg-green-100 text-green-800';
+    }
+    
+    function formatDateTime(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+    
     function selectTruck(truckId) {
         selectedTruckId = truckId;
         updateTruckList();
@@ -502,13 +550,11 @@ function updateTruckData(trucks) {
         }
     }
 
-    // Fungsi untuk refresh data
-   function refreshTrucks() {
-    updateStatus('connecting', 'Memperbarui...');
-    loadTrucks();
-}
+    function refreshTrucks() {
+        updateStatus('connecting', 'Memperbarui...');
+        loadTrucks();
+    }
 
-    // Fungsi untuk menyesuaikan view dengan semua truck
     function fitAllTrucks() {
         if (Object.keys(truckMarkers).length > 0) {
             const group = new L.featureGroup(Object.values(truckMarkers));
@@ -516,86 +562,67 @@ function updateTruckData(trucks) {
         }
     }
 
-    // Fungsi untuk memperbarui statistik
     function updateStatistics() {
         const trucks = Object.values(truckData);
-        const onlineTrucks = trucks.filter(truck => {
-            const timeDiff = Date.now() - truck.lastUpdateTime.getTime();
-            return timeDiff < 300000; // 5 menit
-        });
-        const offlineTrucks = trucks.filter(truck => {
-            const timeDiff = Date.now() - truck.lastUpdateTime.getTime();
-            return timeDiff >= 300000;
-        });
+        const onlineTrucks = trucks.filter(t => (Date.now() - t.lastUpdateTime.getTime()) < 900000);
+        const offlineTrucks = trucks.length - onlineTrucks.length;
 
         document.getElementById('onlineTrucks').textContent = onlineTrucks.length;
-        document.getElementById('offlineTrucks').textContent = offlineTrucks.length;
+        document.getElementById('offlineTrucks').textContent = offlineTrucks;
         document.getElementById('totalTrucks').textContent = trucks.length;
     }
 
-    // Fungsi untuk memperbarui status
     function updateStatus(status, text) {
         const indicator = document.getElementById('statusIndicator');
         const statusText = document.getElementById('statusText');
-        
         statusText.textContent = text;
-        
         indicator.className = 'w-3 h-3 rounded-full';
         switch (status) {
-            case 'connected':
-                indicator.className += ' bg-green-500';
-                break;
-            case 'connecting':
-                indicator.className += ' bg-yellow-500 animate-pulse';
-                break;
-            case 'error':
-                indicator.className += ' bg-red-500';
-                break;
-            default:
-                indicator.className += ' bg-gray-400';
+            case 'connected': indicator.className += ' bg-green-500'; break;
+            case 'connecting': indicator.className += ' bg-yellow-500 animate-pulse'; break;
+            case 'error': indicator.className += ' bg-red-500'; break;
+            default: indicator.className += ' bg-gray-400';
         }
     }
 
-    // Fungsi untuk menampilkan loading
     function showLoading(show) {
         const loadingState = document.getElementById('loadingState');
         const truckList = document.getElementById('truckList');
-        
         if (show) {
             loadingState.classList.remove('hidden');
             truckList.classList.add('hidden');
+        } else {
+            loadingState.classList.add('hidden');
         }
     }
 
-    // Fungsi untuk menampilkan empty state
     function showEmptyState() {
-        const loadingState = document.getElementById('loadingState');
-        const truckList = document.getElementById('truckList');
-        const emptyState = document.getElementById('emptyState');
-        
-        loadingState.classList.add('hidden');
-        truckList.classList.add('hidden');
-        emptyState.classList.remove('hidden');
+        document.getElementById('loadingState').classList.add('hidden');
+        document.getElementById('truckList').classList.add('hidden');
+        document.getElementById('emptyState').classList.remove('hidden');
     }
 
-    // Fungsi untuk memformat waktu
     function formatTime(date) {
         const now = new Date();
         const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / 60000);
-
-        if (diffMins < 1) return 'Sekarang';
+        const diffMins = Math.round(diffMs / 60000);
+        if (diffMins < 1) return 'Baru saja';
         if (diffMins < 60) return `${diffMins} menit lalu`;
-        if (diffMins < 1440) return `${Math.floor(diffMins / 60)} jam lalu`;
-        return date.toLocaleDateString('id-ID') + ' ' + date.toLocaleTimeString('id-ID');
+        const diffHours = Math.round(diffMins / 60);
+        if (diffHours < 24) return `${diffHours} jam lalu`;
+        return date.toLocaleDateString('id-ID');
     }
 
-    // Inisialisasi saat halaman dimuat
+    document.getElementById('transitModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeTransitModal();
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         initMap();
     });
 
-    // Bersihkan interval saat halaman ditutup
     window.addEventListener('beforeunload', function() {
         if (updateInterval) {
             clearInterval(updateInterval);
