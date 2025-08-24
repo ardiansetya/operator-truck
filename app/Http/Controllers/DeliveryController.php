@@ -910,6 +910,8 @@ class DeliveryController extends BaseApiController
                 $positionResponse = $this->makeRequest('GET', "{$this->endpoint}/positions/{$delivery['id']}");
                 $positions = $positionResponse->successful() ? $positionResponse->json('data') : [];
 
+                Log::info('Fetched positions for delivery', ['delivery_id' => $delivery['id'], 'positions' => $positions]);
+         
                 $latestPosition = $positions[0] ?? null;
                 if (!$latestPosition) continue;
 
@@ -1006,6 +1008,8 @@ class DeliveryController extends BaseApiController
                     'model' => $truck['model'] ?? 'Unknown Model',
                     'latitude' => (float) $latestPosition['latitude'],
                     'longitude' => (float) $latestPosition['longitude'],
+                    'city' => $latestPosition['city'] ?? 'Unknown City',
+                    'formatted_address' => $latestPosition['formatted_address'] ?? 'Unknown Address',
                     'last_update' => $latestPosition['recorded_at'],
                     'speed' => $latestPosition['speed'] ?? rand(20, 80),
                     'delivery_info' => [
