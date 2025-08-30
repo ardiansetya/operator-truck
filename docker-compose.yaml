@@ -1,4 +1,3 @@
-# Hapus version yang sudah obsolete
 
 services:
   laravel-app:
@@ -9,8 +8,8 @@ services:
     container_name: laravel-app
     restart: unless-stopped
     volumes:
-      - ./storage:/var/www/html/storage
-      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./storage:/var/www/html/storage:rw
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache:rw
       # Mount public folder ke shared volume
       - laravel-public:/var/www/html/public
       # Mount .env file jika perlu
@@ -21,7 +20,7 @@ services:
       APP_ENV: production
       APP_KEY: base64:0l48qnFS4cpYwJaJsoIyHot/YpR7WgC9fmG/JKzncfc=
       APP_DEBUG: true
-      APP_URL: https://laravel.localhost  # Sesuaikan dengan domain
+      APP_URL: http://154.19.37.110:8000  # Sesuaikan dengan domain
       JAVA_BACKEND_URL: http://154.19.37.110:8080
     healthcheck:
       test: [ "CMD", "php-fpm", "-t" ]
@@ -45,17 +44,21 @@ services:
       - proxy-net
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy-net"  # Sesuaikan dengan network name
+      - "traefik.docker.network=proxy-net"
+      # HTTP di port 8000 (untuk direct access)
+      - "traefik.http.routers.laravel-direct.rule=Host(`154.19.37.110`) && Port(`8000`)"
+      - "traefik.http.routers.laravel-direct.entrypoints=web8000"
+      - "traefik.http.services.laravel-direct.loadbalancer.server.port=80"
 
-      # Router Laravel dengan HTTPS
-      - "traefik.http.routers.laravel.rule=Host(`laravel.localhost`)"  # Ganti domain
+      # HTTPS (untuk nanti jika sudah ada domain/SSL)
+      - "traefik.http.routers.laravel.rule=Host(`laravel.yourdomain.com`)"  # Ganti nanti
       - "traefik.http.routers.laravel.entrypoints=websecure"
       - "traefik.http.routers.laravel.tls=true"
-      - "traefik.http.routers.laravel.tls.certresolver=letsencrypt"  # Jika pakai Let's Encrypt
+      - "traefik.http.routers.laravel.tls.certresolver=letsencrypt"
       - "traefik.http.services.laravel.loadbalancer.server.port=80"
 
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.laravel-insecure.rule=Host(`laravel.localhost`)"
+      # HTTP to HTTPS redirect (untuk domain nanti)
+      - "traefik.http.routers.laravel-insecure.rule=Host(`laravel.yourdomain.com`)"
       - "traefik.http.routers.laravel-insecure.entrypoints=web"
       - "traefik.http.routers.laravel-insecure.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
